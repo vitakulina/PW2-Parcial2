@@ -16,6 +16,9 @@ public class Product {
 	private Integer stock;
 	private BigDecimal unitPrice;
 	
+	public Product() {
+		super();
+	}
 	
 	public Long getId() {
 		return id;

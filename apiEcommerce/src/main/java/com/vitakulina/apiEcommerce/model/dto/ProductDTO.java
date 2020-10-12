@@ -9,6 +9,11 @@ public class ProductDTO {
 	private Integer stock;
 	private BigDecimal unitPrice;
 	
+	
+	public ProductDTO() {
+		super();
+	}
+	
 	public Long getId() {
 		return id;
 	}
