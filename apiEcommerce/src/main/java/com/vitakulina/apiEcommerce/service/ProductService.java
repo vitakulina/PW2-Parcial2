@@ -17,7 +17,7 @@ public interface ProductService {
 	
 	ProductDTO put (ProductDTO productDTO);
 	
-	ProductDTO deleteProduct (Long id);
+	ProductDTO deleteProductById (Long id);
 	
 	
 	

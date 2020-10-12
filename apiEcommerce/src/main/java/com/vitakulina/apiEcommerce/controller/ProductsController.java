@@ -1,8 +1,14 @@
 package com.vitakulina.apiEcommerce.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,15 +21,37 @@ public class ProductsController {
 	ProductServiceImpl productService;
 	
 	public ProductsController(ProductServiceImpl productService) {
+		super();
 		this.productService = productService;
 	}
 	
+	@GetMapping(value = "/products")
+	public ResponseEntity<List<ProductDTO>> getAllProducts(){
+		return new ResponseEntity<>(productService.getAll(), HttpStatus.OK);		
+	}
+	
+	
 	@PostMapping(value = "/products")
 	public ResponseEntity<Object> postProduct(@RequestBody ProductDTO productDTO){
-		//TODO create a service to save products and return the created product
 		ProductDTO productCreatedDTO = productService.post(productDTO);
 		return new ResponseEntity<>(productCreatedDTO, HttpStatus.CREATED);
 	}
 	
+	@GetMapping(value = "/products/{id}")
+	public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id){
+		return new ResponseEntity<>(productService.getById(id), HttpStatus.OK);
+	}
+	
+	@PutMapping(value = "/products/{id}")
+	public ResponseEntity<ProductDTO> updateProduct(@RequestBody ProductDTO productDTO, @PathVariable Long id){
+		productDTO.setId(id);
+		ProductDTO productUpdated = productService.put(productDTO);
+		return new ResponseEntity<>(productUpdated, HttpStatus.OK);
+	}
+	
+	@DeleteMapping(value = "/products/{id}")
+	public ResponseEntity<ProductDTO> deleteProduct(@PathVariable Long id){
+		return new ResponseEntity<>(productService.deleteProductById(id), HttpStatus.OK);
+	}
 
 }
