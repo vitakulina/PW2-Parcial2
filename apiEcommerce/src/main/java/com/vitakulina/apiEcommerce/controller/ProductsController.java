@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vitakulina.apiEcommerce.model.dto.ErrorApi;
 import com.vitakulina.apiEcommerce.model.dto.ProductDTO;
-import com.vitakulina.apiEcommerce.service.business.exception.ProductException;
 import com.vitakulina.apiEcommerce.service.impl.ProductServiceImpl;
 
 @RestController
@@ -46,11 +44,8 @@ public class ProductsController {
 	
 	@PutMapping(value = "/products/{id}")
 	public ResponseEntity<ProductDTO> updateProduct(@RequestBody ProductDTO productDTO, @PathVariable Long id){
-		System.out.println("en put controller");
-		productDTO.setId(id);
-		
+		productDTO.setId(id);		
 		ProductDTO productUpdated = productService.put(productDTO);
-		System.out.println("en put controller -  post service");
 		return new ResponseEntity<>(productUpdated, HttpStatus.OK);
 	}
 	
