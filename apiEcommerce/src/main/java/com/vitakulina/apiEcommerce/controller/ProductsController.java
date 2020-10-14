@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vitakulina.apiEcommerce.model.dto.ErrorApi;
 import com.vitakulina.apiEcommerce.model.dto.ProductDTO;
+import com.vitakulina.apiEcommerce.service.business.exception.ProductException;
 import com.vitakulina.apiEcommerce.service.impl.ProductServiceImpl;
 
 @RestController
@@ -44,8 +46,11 @@ public class ProductsController {
 	
 	@PutMapping(value = "/products/{id}")
 	public ResponseEntity<ProductDTO> updateProduct(@RequestBody ProductDTO productDTO, @PathVariable Long id){
+		System.out.println("en put controller");
 		productDTO.setId(id);
+		
 		ProductDTO productUpdated = productService.put(productDTO);
+		System.out.println("en put controller -  post service");
 		return new ResponseEntity<>(productUpdated, HttpStatus.OK);
 	}
 	
@@ -53,5 +58,12 @@ public class ProductsController {
 	public ResponseEntity<ProductDTO> deleteProduct(@PathVariable Long id){
 		return new ResponseEntity<>(productService.deleteProductById(id), HttpStatus.OK);
 	}
+	
+	/*
+	//Probando buscar los productos por nombre
+	@GetMapping(value = "/products/find-name/{name}")
+	public ResponseEntity<List<ProductDTO>> getProductById(@PathVariable String name){
+		return new ResponseEntity<>(productService.getByProdName(name), HttpStatus.OK);
+	}*/
 
 }

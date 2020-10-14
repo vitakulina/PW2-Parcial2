@@ -1,5 +1,6 @@
 package com.vitakulina.apiEcommerce.service.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +12,9 @@ import com.vitakulina.apiEcommerce.model.Product;
 import com.vitakulina.apiEcommerce.model.dto.ProductDTO;
 import com.vitakulina.apiEcommerce.repository.ProductRepository;
 import com.vitakulina.apiEcommerce.service.ProductService;
+import com.vitakulina.apiEcommerce.service.business.exception.ProductError;
+import com.vitakulina.apiEcommerce.service.business.exception.ProductException;
+import com.vitakulina.apiEcommerce.service.business.exception.ProductNotFoundException;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -41,11 +45,19 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public ProductDTO post(ProductDTO productDTO) {
-		//TODO implement validations on the mandatory fields and throw corresponding exceptions
-		Product product = new Product();
-		BeanUtils.copyProperties(productDTO, product);
-		product = productRepository.save(product);
-		BeanUtils.copyProperties(product, productDTO);
+		if(productDTO.getId() == null) {
+			if(isValidProduct(productDTO)) {
+				Product product = new Product();
+				BeanUtils.copyProperties(productDTO, product);
+				product = productRepository.save(product);
+				BeanUtils.copyProperties(product, productDTO);
+			}			
+			
+		}else {
+			//When adding a new product, the productDTO received as param should not have an id
+			throw new ProductException(ProductError.PRODUCT_ID_NOT_REQUIRED);			
+		}
+		
 		return productDTO;
 	}
 	
@@ -60,7 +72,7 @@ public class ProductServiceImpl implements ProductService {
 			
 			BeanUtils.copyProperties(product.get(), prodDTO);
 		}else {
-			//TODO throw prod not found exception			
+			throw new ProductNotFoundException();			
 		}		
 		return prodDTO;
 	}
@@ -68,22 +80,27 @@ public class ProductServiceImpl implements ProductService {
 	
 	@Override
 	public ProductDTO put(ProductDTO productDTO) {
-		//TODO implement validations on the mandatory fields and throw corresponding exceptions
-		//TODO check if prod id exists
+		if(productDTO.getId() == null || productDTO.getId() == 0) {
+			throw new ProductException(ProductError.PRODUCT_ID_REQUIRED); //TODO confirm where to implement this check, if id not present in put, it doesn't reach this point
+		}
+				
 		Optional<Product> prod = productRepository.findById(productDTO.getId());
 		if(prod.isPresent()) {
-			Product product = prod.get();
-			BeanUtils.copyProperties(productDTO, product);
-			product = productRepository.save(product);			
+			if(isValidProduct(productDTO)) {
+				Product product = prod.get();
+				BeanUtils.copyProperties(productDTO, product);
+				product = productRepository.save(product);
+			}						
 		}else {
-			//TODO throw prod id not found
-		}
-		
+			throw new ProductNotFoundException();
+		}		
 		return productDTO;
 	}
 
+	
 	@Override
 	public ProductDTO deleteProductById(Long id) {
+		//TODO throw ProductPresentInCart Exception once Carts are implemented
 		Optional<Product> product = productRepository.findById(id);
 		ProductDTO prodDTO = new ProductDTO();
 		
@@ -92,15 +109,50 @@ public class ProductServiceImpl implements ProductService {
 			productRepository.delete(product.get());
 			
 		}else {
-			//TODO throw prod id not found
+			throw new ProductNotFoundException();
 		}
 		
 		return prodDTO;
 	}
 	
+	//function to validate fields for post and put
 	public boolean isValidProduct(ProductDTO productDTO) {
-		// TODO throw exceptions according to the missing/invalid parts in the product
+		//validating product description
+		if(productDTO.getDescription() == null || productDTO.getDescription().trim().isEmpty()) {
+			throw new ProductException(ProductError.PRODUCT_DESCRIPTION_REQUIRED);
+		}
+		//validating stock
+		if(productDTO.getStock() == null) {
+			throw new ProductException(ProductError.PRODUCT_STOCK_REQUIRED);
+		}else if(productDTO.getStock() <= 0) {
+			throw new ProductException(ProductError.PRODUCT_STOCK_INVALID);
+		}
+		//validating price
+		if(productDTO.getUnitPrice() == null) {
+			throw new ProductException(ProductError.PRODUCT_UNITPRICE_REQUIRED);
+		}else if((productDTO.getUnitPrice().compareTo(BigDecimal.ZERO) == -1) || 
+				(productDTO.getUnitPrice().compareTo(BigDecimal.ZERO) == 0)) {
+			
+			throw new ProductException(ProductError.PRODUCT_UNITPRICE_INVALID);
+		}
 		return true;
+	}
+	
+	
+	//Testing JPA Repository with custom queries (find by prod name/description which contains (like) the passed name and it's case insensitive)
+	public List<ProductDTO> getByProdName(String name){
+		List<Product> productos = productRepository.findByDescriptionContainsIgnoreCase(name);
+		List<ProductDTO> productosDTO = new ArrayList<>();
+		
+		if(productos != null) {
+			for(Product product : productos) {
+				ProductDTO prodDTO = new ProductDTO();
+				BeanUtils.copyProperties(product, prodDTO);
+				productosDTO.add(prodDTO);
+			}
+			
+		}
+		return productosDTO;
 	}
 
 }
