@@ -3,6 +3,7 @@ import org.springframework.http.HttpStatus;
 
 public enum ProductError {
 	
+	PRODUCT_NOT_PRESENT("PRODUCT_NOT_PRESENT", "Product not present in repository", HttpStatus.NOT_FOUND),
 	PRODUCT_ID_REQUIRED("PRODUCT_ID_REQUIRED", "Product id is required", HttpStatus.BAD_REQUEST),
 	PRODUCT_ID_NOT_REQUIRED("PRODUCT_ID_NOT_REQUIRED", "Product id is not required", HttpStatus.BAD_REQUEST),
 	PRODUCT_DESCRIPTION_REQUIRED("PRODUCT_DESCRIPTION_REQUIRED", "Product description is required",  HttpStatus.BAD_REQUEST),

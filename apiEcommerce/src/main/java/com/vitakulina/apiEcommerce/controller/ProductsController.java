@@ -1,9 +1,13 @@
 package com.vitakulina.apiEcommerce.controller;
 
 import java.util.List;
+import java.util.Optional;
+
+import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +36,7 @@ public class ProductsController {
 	
 	
 	@PostMapping(value = "/products")
-	public ResponseEntity<Object> postProduct(@RequestBody ProductDTO productDTO){
+	public ResponseEntity<Object> postProduct(@Valid @RequestBody ProductDTO productDTO){
 		ProductDTO productCreatedDTO = productService.post(productDTO);
 		return new ResponseEntity<>(productCreatedDTO, HttpStatus.CREATED);
 	}
@@ -42,9 +46,13 @@ public class ProductsController {
 		return new ResponseEntity<>(productService.getById(id), HttpStatus.OK);
 	}
 	
-	@PutMapping(value = "/products/{id}")
-	public ResponseEntity<ProductDTO> updateProduct(@RequestBody ProductDTO productDTO, @PathVariable Long id){
-		productDTO.setId(id);		
+	@PutMapping(value = {"/products", "/products/{id}"})
+	public ResponseEntity<ProductDTO> updateProduct(@Valid @RequestBody ProductDTO productDTO, @PathVariable Optional<Long> id){
+
+		if(id.isPresent()) {
+			productDTO.setId(id.get());			
+		}
+		//the cases where id is not present will be caught in the service
 		ProductDTO productUpdated = productService.put(productDTO);
 		return new ResponseEntity<>(productUpdated, HttpStatus.OK);
 	}

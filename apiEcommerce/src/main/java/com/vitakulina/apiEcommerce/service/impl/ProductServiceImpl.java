@@ -14,7 +14,7 @@ import com.vitakulina.apiEcommerce.repository.ProductRepository;
 import com.vitakulina.apiEcommerce.service.ProductService;
 import com.vitakulina.apiEcommerce.service.business.exception.ProductError;
 import com.vitakulina.apiEcommerce.service.business.exception.ProductException;
-import com.vitakulina.apiEcommerce.service.business.exception.ProductNotFoundException;
+
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -37,8 +37,7 @@ public class ProductServiceImpl implements ProductService {
 				ProductDTO prodDTO = new ProductDTO();
 				BeanUtils.copyProperties(product, prodDTO);
 				productosDTO.add(prodDTO);
-			}
-			
+			}			
 		}
 		return productosDTO;
 	}
@@ -72,7 +71,7 @@ public class ProductServiceImpl implements ProductService {
 			
 			BeanUtils.copyProperties(product.get(), prodDTO);
 		}else {
-			throw new ProductNotFoundException();			
+			throw new ProductException(ProductError.PRODUCT_NOT_PRESENT);			
 		}		
 		return prodDTO;
 	}
@@ -80,8 +79,8 @@ public class ProductServiceImpl implements ProductService {
 	
 	@Override
 	public ProductDTO put(ProductDTO productDTO) {
-		if(productDTO.getId() == null || productDTO.getId() == 0) {
-			throw new ProductException(ProductError.PRODUCT_ID_REQUIRED); //TODO confirm where to implement this check, if id not present in put, it doesn't reach this point
+		if(productDTO.getId() == null) {
+			throw new ProductException(ProductError.PRODUCT_ID_REQUIRED); 
 		}
 				
 		Optional<Product> prod = productRepository.findById(productDTO.getId());
@@ -92,7 +91,7 @@ public class ProductServiceImpl implements ProductService {
 				product = productRepository.save(product);
 			}						
 		}else {
-			throw new ProductNotFoundException();
+			throw new ProductException(ProductError.PRODUCT_NOT_PRESENT);
 		}		
 		return productDTO;
 	}
@@ -109,7 +108,7 @@ public class ProductServiceImpl implements ProductService {
 			productRepository.delete(product.get());
 			
 		}else {
-			throw new ProductNotFoundException();
+			throw new ProductException(ProductError.PRODUCT_NOT_PRESENT);
 		}
 		
 		return prodDTO;
