@@ -17,12 +17,16 @@ public class User {
 	private Long id;
 	
 	private String username;
+		
+	@JsonIgnore
+	private String password;
+	
+	/*
+	
 	private String firstName;
 	private String lastName;
 	private String email;
-	
-	@JsonIgnore
-	private String password;
+	*/
 	
 	public User() {
 		super();
@@ -34,14 +38,6 @@ public class User {
 		this.password = password;
 	}
 	
-	public User(String username, String password, String firstName, String lastName, String email) {
-		super();
-		this.username = username;
-		this.password = password;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.email = email;
-	}
 
 	public Long getId() {
 		return id;
@@ -67,6 +63,7 @@ public class User {
 		this.password = password;
 	}
 
+	/*
 	public String getFirstName() {
 		return firstName;
 	}
@@ -90,7 +87,7 @@ public class User {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
+	*/
 	
 
 }

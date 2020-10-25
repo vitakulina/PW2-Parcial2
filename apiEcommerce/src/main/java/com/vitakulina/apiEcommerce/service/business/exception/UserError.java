@@ -5,9 +5,10 @@ import org.springframework.http.HttpStatus;
 public enum UserError {
 	
 	USER_DUPLICATE_USERNAME("USER_DUPLICATE_USERNAME", "Username already exists", HttpStatus.UNPROCESSABLE_ENTITY),
-	USER_DUPLICATE_EMAIL("USER_DUPLICATE_EMAIL", "The provided email is already in use by an existant account", HttpStatus.UNPROCESSABLE_ENTITY);
-	
-	//TODO: add username and passowrd as mandatory, throwing exception if not present
+	USER_DUPLICATE_EMAIL("USER_DUPLICATE_EMAIL", "The provided email is already in use by an existant account", HttpStatus.UNPROCESSABLE_ENTITY),
+	USER_USERNAME_REQUIRED("USER_USERNAME_REQUIRED", "Username is a required field", HttpStatus.BAD_REQUEST),
+	USER_PASSWORD_REQUIRED("USER_PASSWORD_REQUIRED", "Password is a required field", HttpStatus.BAD_REQUEST);
+
 	
 	private final String errCode;
 	private final String errMessage;

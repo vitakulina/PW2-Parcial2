@@ -40,14 +40,19 @@ public class JwtUserDetailsServiceImpl implements JwtUserDetailsService {
 	@Override
 	public User save(UserDTO userDto) {
 		User newUser = new User();
+		if(isValidUser(userDto)) {
+			newUser.setUsername(userDto.getUsername());
+			newUser.setPassword(bcryptEncoder.encode(userDto.getPassword()));
+		}
+		return userRepo.save(newUser);
 		
-		//Por ahora se permiten nulls para campos que no sean username o pass, por lo que los emails pueden ser nulls y coincidir con otros users
-		//vamos a validar solo si el email no es null
-		//TODO: agregar los demas campos como mandatorios
+		
+		
+		/*
 		String email = null;
 		if(userDto.getEmail() != null) {
 			email = userRepo.findByEmail(userDto.getEmail()).getEmail(); 
-		}
+		} 
 		
 		if(userRepo.findByUsername(userDto.getUsername()) != null) {
 			throw new UserException(UserError.USER_DUPLICATE_USERNAME);
@@ -61,8 +66,22 @@ public class JwtUserDetailsServiceImpl implements JwtUserDetailsService {
 			newUser.setLastName(userDto.getLastName());
 			newUser.setEmail(userDto.getEmail());
 			return userRepo.save(newUser);
+		}*/
+		
+	}
+	
+	private boolean isValidUser(UserDTO userDto) {
+		//validate empty fields
+		if(userDto.getPassword() == null || userDto.getPassword().trim().isEmpty()) {
+			throw new UserException(UserError.USER_PASSWORD_REQUIRED);
 		}
 		
+		if(userDto.getUsername() == null || userDto.getUsername().trim().isEmpty()) {
+			throw new UserException(UserError.USER_USERNAME_REQUIRED);
+		}else if(userRepo.findByUsername(userDto.getUsername()) != null) {
+			throw new UserException(UserError.USER_DUPLICATE_USERNAME);
+		}		
+		return true;
 	}
 
 }
