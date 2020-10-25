@@ -19,6 +19,14 @@ public class ProductServiceErrorAdvice extends ResponseEntityExceptionHandler{
 		return showError(e.getError().getHttpStatus(), e.getError().getErrCode(), e.getError().getErrMessage());
 	}
 	
+	@ExceptionHandler({UserException.class})
+	public ResponseEntity<ErrorApi> handleUserException (UserException e){
+		return showError(e.getError().getHttpStatus(), e.getError().getErrCode(), e.getError().getErrMessage());
+	}
+
+	
+	
+	
 	
 	@ExceptionHandler({RuntimeException.class})
 	public ResponseEntity<ErrorApi> handleRuntimetException(RuntimeException e){
