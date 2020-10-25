@@ -21,7 +21,7 @@ import com.vitakulina.apiEcommerce.service.impl.ProductServiceImpl;
 @RestController
 public class ProductsController {
 	
-	ProductServiceImpl productService;
+	private ProductServiceImpl productService;
 	
 	public ProductsController(ProductServiceImpl productService) {
 		super();

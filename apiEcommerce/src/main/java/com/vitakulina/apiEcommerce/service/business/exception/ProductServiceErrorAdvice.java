@@ -24,7 +24,10 @@ public class ProductServiceErrorAdvice extends ResponseEntityExceptionHandler{
 		return showError(e.getError().getHttpStatus(), e.getError().getErrCode(), e.getError().getErrMessage());
 	}
 
-	
+	@ExceptionHandler({CartException.class})
+	public ResponseEntity<ErrorApi> handleCartException (CartException e){
+		return showError(e.getError().getHttpStatus(), e.getError().getErrCode(), e.getError().getErrMessage());
+	}
 	
 	
 	
