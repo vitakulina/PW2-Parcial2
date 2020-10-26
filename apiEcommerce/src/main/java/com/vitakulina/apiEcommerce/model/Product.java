@@ -1,10 +1,12 @@
 package com.vitakulina.apiEcommerce.model;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -25,6 +27,10 @@ public class Product {
 	@NotNull
 	@Min(1)
 	private BigDecimal unitPrice;
+	
+	@OneToMany(mappedBy = "product")
+	Set<ProductInCart> productsInCart;
+	
 	
 	public Product() {
 		super();
