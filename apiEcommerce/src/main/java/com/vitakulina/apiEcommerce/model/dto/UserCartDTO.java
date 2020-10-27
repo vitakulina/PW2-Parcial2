@@ -2,8 +2,8 @@ package com.vitakulina.apiEcommerce.model.dto;
 
 public class UserCartDTO {
 	
-	String fullName;
-	String email;
+	private String fullName;
+	private String email;
 	
 	public UserCartDTO() {
 		super();
