@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -93,7 +94,8 @@ public class CartServiceImpl implements CartService {
 			
 			BeanUtils.copyProperties(cart, cartDTO);
 			Set<ProductDTO> productsDTO = new HashSet<>();
-			List<ProductInCart> productsInCart = productInCartRepo.findByCart(cart);
+			Set<ProductInCart> productsInCart = cart.getProductsInCart();
+			//List<ProductInCart> productsInCart = productInCartRepo.findByCart(cart); //TODO: llamar desde el repo de cart para obtener el set de prodInCart
 			System.out.println("List size : " + productsInCart.size());
 			
 			productsInCart.forEach((pr) ->{
@@ -105,8 +107,7 @@ public class CartServiceImpl implements CartService {
 					ProductDTO prodDTO = new ProductDTO();
 					BeanUtils.copyProperties(prodOpt.get(), prodDTO);
 					productsDTO.add(prodDTO);
-					
-					
+									
 				}
 			});
 			
@@ -118,6 +119,27 @@ public class CartServiceImpl implements CartService {
 		
 		return cartDTO;
 							
+	}
+	
+	Set<ProductDTO> getProductDTOSetInCart(Set<ProductInCart> productsInCart){
+		System.out.println("List size : " + productsInCart.size());
+		Set<ProductDTO> productsDTO = new HashSet<>();
+		
+		productsInCart.forEach((pr) ->{
+			System.out.println("ProductsInCart id:  " + pr.getProduct().getId());
+			
+			
+			Optional<Product> prodOpt = productRepo.findById(pr.getProduct().getId());
+			if(prodOpt.isPresent()) {
+				ProductDTO prodDTO = new ProductDTO();
+				BeanUtils.copyProperties(prodOpt.get(), prodDTO);
+				productsDTO.add(prodDTO);
+								
+			}
+		});
+		
+		return productsDTO;
+		
 	}
 
 
@@ -136,8 +158,44 @@ public class CartServiceImpl implements CartService {
 
 	@Override
 	public CartDTO getCart(Long cartId) {
-		// TODO Auto-generated method stub
-		return null;
+		Optional<Cart> cartOpt = cartRepo.findById(cartId);
+		CartDTO cartDTO = new CartDTO();
+		if(cartOpt.isPresent()) {
+			Cart cart = cartOpt.get();
+			BeanUtils.copyProperties(cart, cartDTO);
+			
+			Set<ProductDTO> productsDTO = new HashSet<>();
+			Set<ProductInCart> productsInCart = cart.getProductsInCart();
+			
+			/*
+			System.out.println("Set size : " + productsInCart.size());
+			
+			productsInCart.forEach((pr) ->{
+				System.out.println("ProductsInCart id:  " + pr.getProduct().getId());
+			}); */
+			
+			Set<Long> idsSet = productsInCart.parallelStream().map(prC -> prC.getProduct().getId()).collect(Collectors.toSet()); //obteniendo el set de product ids
+			
+			idsSet.forEach(idProd -> {
+				Optional<Product> prodOpt = productRepo.findById(idProd);
+				if(prodOpt.isPresent()) {
+					ProductDTO prodDTO = new ProductDTO();
+					BeanUtils.copyProperties(prodOpt.get(), prodDTO);
+					productsDTO.add(prodDTO);									
+				}
+			});
+			
+			cartDTO.setProducts(productsDTO);
+
+			
+			
+			
+		}else {
+			throw new CartException(CartError.CART_NOT_PRESENT);
+		}
+		
+		
+		return cartDTO;
 	}
 
 	@Override

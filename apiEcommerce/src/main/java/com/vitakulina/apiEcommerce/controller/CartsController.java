@@ -4,6 +4,7 @@ import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +36,12 @@ public class CartsController {
 	public ResponseEntity<CartDTO> addProductToCart(@Valid @RequestBody CartProductDTO cartProductDTO, 
 			@PathVariable(value="id") Long id){
 		CartDTO cart = cartService.postProductToCart(id, cartProductDTO);
+		return new ResponseEntity<>(cart, HttpStatus.OK);
+	}
+	
+	@GetMapping(value="/carts/{id}")
+	public ResponseEntity<CartDTO> viewCart(@PathVariable(value="id") Long id){
+		CartDTO cart = cartService.getCart(id);
 		return new ResponseEntity<>(cart, HttpStatus.OK);
 	}
 
