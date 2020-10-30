@@ -1,10 +1,9 @@
 package com.vitakulina.apiEcommerce.service.impl;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -78,76 +77,56 @@ public class CartServiceImpl implements CartService {
 			
 			validateQuantity(cartProductDTO);
 			Product product = validateProduct(cartProductDTO);
-			System.out.println("Total before: " + cart.getTotal());
 			
 			addToTotal(cart, product.getUnitPrice(), cartProductDTO.getQuantity());
+			//TODO: restar de product stock el quantity agregado al cart
 			
-			System.out.println("Total after: " + cart.getTotal());
-			
-			ProductInCart prodInCart = new ProductInCart();
+			ProductInCart prodInCart = new ProductInCart(); //TODO: como tratar el caso cuando se agrega un producto que ya esta en el cart pero ahora tiene otro precio?
 			prodInCart.setCart(cart);
 			prodInCart.setProduct(product);
 			prodInCart.setQuantity(cartProductDTO.getQuantity());
-			prodInCart.setUnitPrice(product.getUnitPrice());
-			
+			prodInCart.setUnitPrice(product.getUnitPrice());			
 			productInCartRepo.save(prodInCart);	
 			
 			BeanUtils.copyProperties(cart, cartDTO);
-			Set<ProductDTO> productsDTO = new HashSet<>();
+			
 			Set<ProductInCart> productsInCart = cart.getProductsInCart();
-			//List<ProductInCart> productsInCart = productInCartRepo.findByCart(cart); //TODO: llamar desde el repo de cart para obtener el set de prodInCart
-			System.out.println("List size : " + productsInCart.size());
+			Set<ProductDTO> productsDTO = getProductDTOSetInCart(productsInCart);					
+			cartDTO.setProducts(productsDTO); 
+		}else {
+			throw new CartException(CartError.CART_NOT_PRESENT);
+		}
+		
+		return cartDTO;							
+	}
+	
+
+
+	@Override
+	public CartDTO deleteProductFromCart(Long cartId, Long productId) {
+		//TODO: definir en que situacion el cart estaria en modo PROCESSING para poder lanzar la excepcion
+		Optional<Cart> cartOpt = cartRepo.findById(cartId);
+		CartDTO cartDTO = new CartDTO();
+		if(cartOpt.isPresent()) {
+			Cart cart = cartOpt.get();
+			Set<ProductInCart> productsInCart = cart.getProductsInCart();
+			Optional<ProductInCart> productToDelete = productsInCart.stream().filter(p -> p.getProduct().getId().equals(productId)).findFirst();
+			if(productToDelete.isPresent()){
+				//TODO: delete product from cart, update Cart Total and delete entries from ProductInCart table. Add back the stock to Product
 			
-			productsInCart.forEach((pr) ->{
-				System.out.println("ProductsInCart id:  " + pr.getProduct().getId());
 				
-				
-				Optional<Product> prodOpt = productRepo.findById(pr.getProduct().getId());
-				if(prodOpt.isPresent()) {
-					ProductDTO prodDTO = new ProductDTO();
-					BeanUtils.copyProperties(prodOpt.get(), prodDTO);
-					productsDTO.add(prodDTO);
-									
-				}
-			});
+				BeanUtils.copyProperties(cart, cartDTO);
+				cartDTO.setProducts(getProductDTOSetInCart(productsInCart));
+			}else {
+				throw new ProductException(ProductError.PRODUCT_NOT_PRESENT);
+			}
 			
-			cartDTO.setProducts(productsDTO); //TODO: no son prods unicos, va agregando como una lista ya que son objetos diferentes (pero mismo prod)
-			//desambiguar por id o descripcion, override equals
+			
 		}else {
 			throw new CartException(CartError.CART_NOT_PRESENT);
 		}
 		
 		return cartDTO;
-							
-	}
-	
-	Set<ProductDTO> getProductDTOSetInCart(Set<ProductInCart> productsInCart){
-		System.out.println("List size : " + productsInCart.size());
-		Set<ProductDTO> productsDTO = new HashSet<>();
-		
-		productsInCart.forEach((pr) ->{
-			System.out.println("ProductsInCart id:  " + pr.getProduct().getId());
-			
-			
-			Optional<Product> prodOpt = productRepo.findById(pr.getProduct().getId());
-			if(prodOpt.isPresent()) {
-				ProductDTO prodDTO = new ProductDTO();
-				BeanUtils.copyProperties(prodOpt.get(), prodDTO);
-				productsDTO.add(prodDTO);
-								
-			}
-		});
-		
-		return productsDTO;
-		
-	}
-
-
-
-	@Override
-	public CartDTO deleteProductFromCart(Long cartId, Long productId) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -163,46 +142,35 @@ public class CartServiceImpl implements CartService {
 		if(cartOpt.isPresent()) {
 			Cart cart = cartOpt.get();
 			BeanUtils.copyProperties(cart, cartDTO);
-			
-			Set<ProductDTO> productsDTO = new HashSet<>();
-			Set<ProductInCart> productsInCart = cart.getProductsInCart();
-			
-			/*
-			System.out.println("Set size : " + productsInCart.size());
-			
-			productsInCart.forEach((pr) ->{
-				System.out.println("ProductsInCart id:  " + pr.getProduct().getId());
-			}); */
-			
-			Set<Long> idsSet = productsInCart.parallelStream().map(prC -> prC.getProduct().getId()).collect(Collectors.toSet()); //obteniendo el set de product ids
-			
-			idsSet.forEach(idProd -> {
-				Optional<Product> prodOpt = productRepo.findById(idProd);
-				if(prodOpt.isPresent()) {
-					ProductDTO prodDTO = new ProductDTO();
-					BeanUtils.copyProperties(prodOpt.get(), prodDTO);
-					productsDTO.add(prodDTO);									
-				}
-			});
-			
-			cartDTO.setProducts(productsDTO);
 
-			
-			
-			
+			cartDTO.setProducts(getProductDTOSetInCart(cart.getProductsInCart()));						
 		}else {
 			throw new CartException(CartError.CART_NOT_PRESENT);
-		}
-		
-		
+		}				
 		return cartDTO;
 	}
 
+	
 	@Override
 	public CartDTO postCheckoutCart(Long cartId) {
-		// TODO Auto-generated method stub
-		// el status not allow checkout err seguramente es si el Set de prod dto esta vacio
-		return null;
+		Optional<Cart> cartOpt = cartRepo.findById(cartId);
+		CartDTO cartDTO = new CartDTO();
+		if(cartOpt.isPresent()) {
+			Cart cart = cartOpt.get();
+			if(cart.getProductsInCart() != null && cart.getProductsInCart().size() > 0) {
+				//Solo se va poder pasar a "READY" un cart que tenga productos agregados y un total mayor a cero, si no tiene se va lanzar una excepcion
+				cart.setStatus(CartStatus.READY.getStatus());
+				cartRepo.save(cart);
+				
+				BeanUtils.copyProperties(cart, cartDTO);
+				cartDTO.setProducts(getProductDTOSetInCart(cart.getProductsInCart()));
+			}else {
+				throw new CartException(CartError.CART_STATUS_NOT_ALLOW_CHECKOUT);
+			}			
+		}else {
+			throw new CartException(CartError.CART_NOT_PRESENT);
+		}
+		return cartDTO;
 	}
 	
 	
@@ -223,11 +191,28 @@ public class CartServiceImpl implements CartService {
 		}
 		
 		Optional<Product> prodOpt = productRepo.findById(cartProductDTO.getProductId());
-		if(prodOpt.isPresent()) {
+		if(prodOpt.isPresent()) {			
 			return prodOpt.get();
 		}else {
 			throw new ProductException(ProductError.PRODUCT_NOT_PRESENT);
 		}				
+	}
+	
+	private Set<ProductDTO> getProductDTOSetInCart(Set<ProductInCart> productsInCart){
+		System.out.println("List size : " + productsInCart.size());
+		Set<ProductDTO> productsDTO = new HashSet<>();
+		
+		productsInCart.forEach((pr) ->{
+			System.out.println("ProductsInCart id:  " + pr.getProduct().getId());
+						
+			Optional<Product> prodOpt = productRepo.findById(pr.getProduct().getId());
+			if(prodOpt.isPresent()) {
+				ProductDTO prodDTO = new ProductDTO();
+				BeanUtils.copyProperties(prodOpt.get(), prodDTO);
+				productsDTO.add(prodDTO);								
+			}
+		});		
+		return productsDTO;		
 	}
 	
 	
@@ -236,6 +221,14 @@ public class CartServiceImpl implements CartService {
 			throw new CartException(CartError.PRODUCT_QUANTITY_REQUIRED);
 		}else if(cartProductDTO.getQuantity() < 1){
 			throw new CartException(CartError.PRODUCT_QUANTITY_INVALID);
+		}else {
+			Optional<Product> prodOpt = productRepo.findById(cartProductDTO.getProductId());
+			if(prodOpt.isPresent()) {
+				Product product = prodOpt.get();
+				if(product.getStock() < cartProductDTO.getQuantity()) {
+					throw new CartException(CartError.CART_INSUFFICIENT_PRODUCT_STOCK);
+				}
+			}
 		}
 	}
 	
@@ -244,6 +237,7 @@ public class CartServiceImpl implements CartService {
 		cart.setTotal(cart.getTotal().add(productTotal));
 		cartRepo.save(cart); //updating cart with new total		
 	}
+	
 
 	
 }

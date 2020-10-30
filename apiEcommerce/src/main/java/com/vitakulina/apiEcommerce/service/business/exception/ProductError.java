@@ -13,6 +13,7 @@ public enum ProductError {
 	PRODUCT_UNITPRICE_INVALID("PRODUCT_UNITPRICE_INVALID", "Product unitprice must be greater than 0", HttpStatus.BAD_REQUEST),
 	PRODUCT_PRESENT_IN_CART("PRODUCT_PRESENT_IN_CART", "Product is present in carts. Deletion is not possible", HttpStatus.CONFLICT);
 	
+	
 	private final String errCode;
 	private final String errMessage;
 	private final HttpStatus httpStatus;
