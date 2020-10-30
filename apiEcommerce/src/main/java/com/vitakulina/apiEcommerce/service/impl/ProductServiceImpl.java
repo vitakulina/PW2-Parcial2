@@ -9,7 +9,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import com.vitakulina.apiEcommerce.model.Product;
+import com.vitakulina.apiEcommerce.model.ProductInCart;
 import com.vitakulina.apiEcommerce.model.dto.ProductDTO;
+import com.vitakulina.apiEcommerce.repository.ProductInCartRepository;
 import com.vitakulina.apiEcommerce.repository.ProductRepository;
 import com.vitakulina.apiEcommerce.service.ProductService;
 import com.vitakulina.apiEcommerce.service.business.exception.ProductError;
@@ -20,10 +22,12 @@ import com.vitakulina.apiEcommerce.service.business.exception.ProductException;
 public class ProductServiceImpl implements ProductService {
 	
 	private final ProductRepository productRepository;
+	private final ProductInCartRepository productInCartRepo;
 	
-	public ProductServiceImpl (ProductRepository productRepository) {
+	public ProductServiceImpl (ProductRepository productRepository, ProductInCartRepository productInCartRepo) {
 		super();
 		this.productRepository = productRepository;
+		this.productInCartRepo = productInCartRepo;
 	}
 
 	
@@ -104,6 +108,15 @@ public class ProductServiceImpl implements ProductService {
 		ProductDTO prodDTO = new ProductDTO();
 		
 		if(product.isPresent()) {
+			//Check if product is inside a cart before deleting
+			Optional<List<ProductInCart>> productsInCart = productInCartRepo.findByProduct(product.get());
+			if(productsInCart.isPresent()) {
+				System.out.println("Prod Present in cart");
+				if(productsInCart.get().size() > 0) {
+					System.out.println("Prod List size : " + productsInCart.get().size());
+					throw new ProductException(ProductError.PRODUCT_PRESENT_IN_CART);
+				}
+			}
 			BeanUtils.copyProperties(product.get(), prodDTO);
 			productRepository.delete(product.get());
 			
