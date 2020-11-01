@@ -1,5 +1,6 @@
 package com.vitakulina.apiEcommerce.service;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import com.vitakulina.apiEcommerce.model.dto.UserCartDTO;
 @Service
 public interface CartService {
 	
+	List<CartDTO>getAllCarts();
 	CartDTO postNewCart(UserCartDTO userDetails);
 	CartDTO postProductToCart(Long cartId, CartProductDTO cartProductDTO);
 	CartDTO deleteProductFromCart(Long cartId, Long productId);

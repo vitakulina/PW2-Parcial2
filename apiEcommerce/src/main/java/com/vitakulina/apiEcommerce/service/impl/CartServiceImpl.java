@@ -1,9 +1,11 @@
 package com.vitakulina.apiEcommerce.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -45,7 +47,36 @@ public class CartServiceImpl implements CartService {
 		this.productInCartRepo = productInCartRepo;
 	}
 
+	
 
+	//TODO: no permitir agregar productos a un Cart que esta en status CHECKOUT (READY)
+	//TODO: un cart que ya esta en checkout (READY) no se puede poner de vuelta en checkout ni agregarle productos ni sacarle productos
+	//TODO: implementar para Products en delete la misma logica que en put product sin id, que sea una variable de path opcional y que lance una excepcion de que falta el id
+	//TODO: el descuento de stock en el producto se va hacer en el checkout de los carritos, no antes. En el proyecto lo vamos a hacer en batch. Se van a tomar todos los carritos en ready y ahi se van a procesar, se va descontar el stock y se pone en Finalizado el carrito.
+	//TODO: no permitir crear dos carritos con el mismo mail -> para Testing unitario. Se prueba del servicio para atras.
+	
+	
+	@Override
+	public List<CartDTO> getAllCarts() {
+		List<Cart> carts = cartRepo.findAll();
+		List<CartDTO> cartsDTO = new ArrayList<>();
+		if(carts != null) {
+			
+			carts.forEach(c ->{
+				CartDTO cartDTO = new CartDTO();
+				BeanUtils.copyProperties(c, cartDTO);
+				cartDTO.setProducts(getProductDTOSetInCart(c.getProductsInCart()));
+				cartsDTO.add(cartDTO);
+			});
+			
+			
+		}else {
+			throw new CartException(CartError.NO_CARTS_AVAILABLE);
+		}
+		
+		return cartsDTO;
+	}
+	
 	@Override
 	public CartDTO postNewCart(UserCartDTO userDetails) {
 		validateUserDetails(userDetails);
@@ -79,9 +110,8 @@ public class CartServiceImpl implements CartService {
 			Product product = validateProduct(cartProductDTO);
 			
 			addToTotal(cart, product.getUnitPrice(), cartProductDTO.getQuantity());
-			//TODO: restar de product stock el quantity agregado al cart
 			
-			ProductInCart prodInCart = new ProductInCart(); //TODO: como tratar el caso cuando se agrega un producto que ya esta en el cart pero ahora tiene otro precio?
+			ProductInCart prodInCart = new ProductInCart(); 
 			prodInCart.setCart(cart);
 			prodInCart.setProduct(product);
 			prodInCart.setQuantity(cartProductDTO.getQuantity());
@@ -104,22 +134,53 @@ public class CartServiceImpl implements CartService {
 
 	@Override
 	public CartDTO deleteProductFromCart(Long cartId, Long productId) {
-		//TODO: definir en que situacion el cart estaria en modo PROCESSING para poder lanzar la excepcion
+		//FIXME: internal server error si un producto fue agregado mas de una vez al carrito
 		Optional<Cart> cartOpt = cartRepo.findById(cartId);
 		CartDTO cartDTO = new CartDTO();
 		if(cartOpt.isPresent()) {
 			Cart cart = cartOpt.get();
+			if (cart.getStatus().equals("READY")){
+				throw new CartException(CartError.CART_PROCESSING_NOT_ALLOW_DELETION);
+			}
 			Set<ProductInCart> productsInCart = cart.getProductsInCart();
-			Optional<ProductInCart> productToDelete = productsInCart.stream().filter(p -> p.getProduct().getId().equals(productId)).findFirst();
-			if(productToDelete.isPresent()){
-				//TODO: delete product from cart, update Cart Total and delete entries from ProductInCart table. Add back the stock to Product
+			Set<ProductInCart> productsToDelete = productsInCart.stream()
+					.filter(p -> p.getProduct().getId().equals(productId)).collect(Collectors.toSet());
 			
+			System.out.println("Amount of products to delete: " + productsToDelete.size());
+			if(productsToDelete != null && productsToDelete.size() > 0) {
+				
+				productsToDelete.forEach(pr -> {
+					deductFromTotal(cart, pr.getUnitPrice(), pr.getQuantity());
+					productInCartRepo.delete(pr);
+					System.out.println("--- ELIMINO ---");
+					
+				});
+				System.out.println("--- salio del for -----------------");
+				//cartRepo.save(cart);
+				BeanUtils.copyProperties(cart, cartDTO);
+				cartDTO.setProducts(getProductDTOSetInCart(cart.getProductsInCart()));
+				
+			}else {
+				throw new ProductException(ProductError.PRODUCT_NOT_PRESENT);
+			}
+			
+			
+			
+			
+			/*
+			Optional<ProductInCart> productToDeleteOpt = productsInCart.stream().filter(p -> p.getProduct().getId().equals(productId)).findFirst();
+			if(productToDeleteOpt.isPresent()){
+				//TODO: delete product from cart, update Cart Total and delete entries from ProductInCart table. Add back the stock to Product
+				
+			
+				
+				
 				
 				BeanUtils.copyProperties(cart, cartDTO);
 				cartDTO.setProducts(getProductDTOSetInCart(productsInCart));
 			}else {
 				throw new ProductException(ProductError.PRODUCT_NOT_PRESENT);
-			}
+			}*/
 			
 			
 		}else {
@@ -128,6 +189,9 @@ public class CartServiceImpl implements CartService {
 		
 		return cartDTO;
 	}
+
+
+
 
 	@Override
 	public Set<ProductInCartDTO> getProductsInCart(Long cartId) {
@@ -239,5 +303,14 @@ public class CartServiceImpl implements CartService {
 	}
 	
 
+	private void deductFromTotal(Cart cart, BigDecimal unitPrice, Integer quantity) {
+		BigDecimal productTotal = unitPrice.multiply(new BigDecimal(quantity));
+		cart.setTotal(cart.getTotal().subtract(productTotal));
+		cartRepo.save(cart);
+		
+	}
+
+
+	
 	
 }

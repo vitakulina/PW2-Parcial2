@@ -42,6 +42,8 @@ public class ProductServiceImpl implements ProductService {
 				BeanUtils.copyProperties(product, prodDTO);
 				productosDTO.add(prodDTO);
 			}			
+		}else {
+			throw new ProductException(ProductError.NO_PRODUCTS_AVAILABLE);
 		}
 		return productosDTO;
 	}

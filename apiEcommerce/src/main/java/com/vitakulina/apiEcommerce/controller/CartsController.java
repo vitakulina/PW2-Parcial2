@@ -1,5 +1,7 @@
 package com.vitakulina.apiEcommerce.controller;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,11 @@ public class CartsController {
 		this.cartService = cartService;
 	}
 	
+	@GetMapping(value="/carts")
+	public ResponseEntity<List<CartDTO>> viewAllCarts(){
+		List<CartDTO> carts = cartService.getAllCarts();
+		return new ResponseEntity<>(carts, HttpStatus.OK);
+	}
 	
 	@PostMapping(value="/carts")
 	public ResponseEntity<CartDTO> createCart(@Valid @RequestBody UserCartDTO userCartDTO){
