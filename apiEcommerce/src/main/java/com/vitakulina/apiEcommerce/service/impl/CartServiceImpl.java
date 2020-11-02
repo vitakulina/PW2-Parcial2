@@ -152,10 +152,9 @@ public class CartServiceImpl implements CartService {
 				productsToDelete.forEach(pr -> {
 					deductFromTotal(cart, pr.getUnitPrice(), pr.getQuantity());
 					productInCartRepo.delete(pr);
-					System.out.println("--- ELIMINO ---");
+					cart.removeProduct(pr);
 					
 				});
-				System.out.println("--- salio del for -----------------");
 				//cartRepo.save(cart);
 				BeanUtils.copyProperties(cart, cartDTO);
 				cartDTO.setProducts(getProductDTOSetInCart(cart.getProductsInCart()));
@@ -263,12 +262,9 @@ public class CartServiceImpl implements CartService {
 	}
 	
 	private Set<ProductDTO> getProductDTOSetInCart(Set<ProductInCart> productsInCart){
-		System.out.println("List size : " + productsInCart.size());
 		Set<ProductDTO> productsDTO = new HashSet<>();
 		
-		productsInCart.forEach((pr) ->{
-			System.out.println("ProductsInCart id:  " + pr.getProduct().getId());
-						
+		productsInCart.forEach((pr) ->{						
 			Optional<Product> prodOpt = productRepo.findById(pr.getProduct().getId());
 			if(prodOpt.isPresent()) {
 				ProductDTO prodDTO = new ProductDTO();
