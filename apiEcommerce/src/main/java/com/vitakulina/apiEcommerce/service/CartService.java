@@ -20,6 +20,7 @@ public interface CartService {
 	Set<ProductInCartDTO> getProductsInCart(Long cartId);
 	CartDTO getCart(Long cartId);
 	CartDTO postCheckoutCart(Long cartId);
+	List<CartDTO> getCartsByEmail(String email);
 	
 	
 }
