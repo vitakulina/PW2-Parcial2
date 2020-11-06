@@ -104,29 +104,35 @@ public class ProductServiceImpl implements ProductService {
 
 	
 	@Override
-	public ProductDTO deleteProductById(Long id) {
-		//TODO throw ProductPresentInCart Exception once Carts are implemented
-		Optional<Product> product = productRepository.findById(id);
-		ProductDTO prodDTO = new ProductDTO();
-		
-		if(product.isPresent()) {
-			//Check if product is inside a cart before deleting
-			Optional<List<ProductInCart>> productsInCart = productInCartRepo.findByProduct(product.get());
-			if(productsInCart.isPresent()) {
-				System.out.println("Prod Present in cart");
-				if(productsInCart.get().size() > 0) {
-					System.out.println("Prod List size : " + productsInCart.get().size());
-					throw new ProductException(ProductError.PRODUCT_PRESENT_IN_CART);
+	public ProductDTO deleteProductById(Optional<Long> idOpt) {
+		if(idOpt.isPresent()) {
+			Long id = idOpt.get();
+			
+			Optional<Product> product = productRepository.findById(id);
+			ProductDTO prodDTO = new ProductDTO();
+			
+			if(product.isPresent()) {
+				//Check if product is inside a cart before deleting
+				Optional<List<ProductInCart>> productsInCart = productInCartRepo.findByProduct(product.get());
+				if(productsInCart.isPresent()) {
+					if(productsInCart.get().size() > 0) {
+						System.out.println("Prod List size : " + productsInCart.get().size());
+						throw new ProductException(ProductError.PRODUCT_PRESENT_IN_CART);
+					}
 				}
+				BeanUtils.copyProperties(product.get(), prodDTO);
+				productRepository.delete(product.get());
+				
+			}else {
+				throw new ProductException(ProductError.PRODUCT_NOT_PRESENT);
 			}
-			BeanUtils.copyProperties(product.get(), prodDTO);
-			productRepository.delete(product.get());
+			
+			return prodDTO;				
 			
 		}else {
 			throw new ProductException(ProductError.PRODUCT_NOT_PRESENT);
 		}
 		
-		return prodDTO;
 	}
 	
 	//function to validate fields for post and put

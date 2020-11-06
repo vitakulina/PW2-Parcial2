@@ -1,6 +1,7 @@
 package com.vitakulina.apiEcommerce.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ public interface ProductService {
 	
 	ProductDTO put (ProductDTO productDTO);
 	
-	ProductDTO deleteProductById (Long id);
+	ProductDTO deleteProductById (Optional<Long> idOpt);
 	
 	
 	
