@@ -1,6 +1,7 @@
 package com.vitakulina.apiEcommerce.controller;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vitakulina.apiEcommerce.model.dto.CartDTO;
 import com.vitakulina.apiEcommerce.model.dto.CartProductDTO;
+import com.vitakulina.apiEcommerce.model.dto.ProductInCartDTO;
 import com.vitakulina.apiEcommerce.model.dto.UserCartDTO;
 import com.vitakulina.apiEcommerce.service.impl.CartServiceImpl;
 
@@ -55,7 +57,12 @@ public class CartsController {
 	}
 		
 	
-	
+	@GetMapping(value="/carts/{cartId}/products")
+	public ResponseEntity<Set<ProductInCartDTO>> viewProductsInCart(@PathVariable(
+			value="cartId") Long cartId){
+		Set<ProductInCartDTO> products = cartService.getProductsInCart(cartId);
+		return new ResponseEntity<>(products, HttpStatus.OK);
+	}
 	
 	
 	
