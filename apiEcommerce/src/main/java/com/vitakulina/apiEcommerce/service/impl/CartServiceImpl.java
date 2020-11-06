@@ -51,7 +51,6 @@ public class CartServiceImpl implements CartService {
 
 	//TODO: no permitir agregar productos a un Cart que esta en status CHECKOUT (READY)
 	//TODO: un cart que ya esta en checkout (READY) no se puede poner de vuelta en checkout ni agregarle productos ni sacarle productos
-	//TODO: implementar para Products en delete la misma logica que en put product sin id, que sea una variable de path opcional y que lance una excepcion de que falta el id
 	//TODO: el descuento de stock en el producto se va hacer en el checkout de los carritos, no antes. En el proyecto lo vamos a hacer en batch. Se van a tomar todos los carritos en ready y ahi se van a procesar, se va descontar el stock y se pone en Finalizado el carrito.
 	//TODO: no permitir crear dos carritos con el mismo mail -> para Testing unitario. Se prueba del servicio para atras.
 	
@@ -195,7 +194,8 @@ public class CartServiceImpl implements CartService {
 	@Override
 	public Set<ProductInCartDTO> getProductsInCart(Long cartId) {
 		// TODO Auto-generated method stub
-		return null;
+		Set<ProductInCartDTO> productsInCart = new HashSet<>();
+		return productsInCart;
 	}
 
 	@Override
