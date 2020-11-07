@@ -21,6 +21,7 @@ public interface CartService {
 	CartDTO getCart(Long cartId);
 	CartDTO postCheckoutCart(Long cartId);
 	List<CartDTO> getCartsByEmail(String email);
+	List<CartDTO> getCartByStatus(String string);
 	
 	
 }

@@ -7,8 +7,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vitakulina.apiEcommerce.model.Cart;
 import com.vitakulina.apiEcommerce.model.Product;
@@ -77,6 +79,7 @@ public class CartServiceImpl implements CartService {
 	}
 	
 	@Override
+	@Transactional
 	public CartDTO postNewCart(UserCartDTO userDetails) {
 		validateUserDetails(userDetails);
 		Cart cart = new Cart();
@@ -244,7 +247,8 @@ public class CartServiceImpl implements CartService {
 		}
 		if(userDetails.getEmail() == null || userDetails.getEmail().trim().isEmpty()) {
 			throw new CartException(CartError.CART_EMAIL_REQUIRED);
-		}		
+		}	
+		//TODO: validar email, que tenga formato valido
 	}
 	
 	
@@ -313,6 +317,19 @@ public class CartServiceImpl implements CartService {
 		// TODO Auto-generated method stub
 		//TEST git
 		return null;
+	}
+
+
+
+	@Override
+	public List<CartDTO> getCartByStatus(String status) {
+		//check if status is available and if so, check if it's valid (available in the enum)
+		
+		status.toUpperCase();
+		EnumUtils.isValidEnum(CartStatus.class, status);
+		
+		// TODO Auto-generated method stub
+		return new ArrayList<CartDTO>() ;
 	}
 
 
