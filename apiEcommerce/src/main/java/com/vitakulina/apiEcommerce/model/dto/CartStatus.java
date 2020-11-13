@@ -2,7 +2,10 @@ package com.vitakulina.apiEcommerce.model.dto;
 
 public enum CartStatus {
 	NEW("NEW"),
-	READY("READY");
+	READY("READY"),
+	PROCESSED("PROCESSED"),
+	FAILED("FAILED");
+
 	
 	private final String status;
 	

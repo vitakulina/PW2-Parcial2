@@ -51,10 +51,9 @@ public class CartServiceImpl implements CartService {
 
 	
 
-	//TODO: no permitir agregar productos a un Cart que esta en status CHECKOUT (READY)
-	//TODO: un cart que ya esta en checkout (READY) no se puede poner de vuelta en checkout ni agregarle productos ni sacarle productos
+
 	//TODO: el descuento de stock en el producto se va hacer en el checkout de los carritos, no antes. En el proyecto lo vamos a hacer en batch. Se van a tomar todos los carritos en ready y ahi se van a procesar, se va descontar el stock y se pone en Finalizado el carrito.
-	//TODO: no permitir crear dos carritos con el mismo mail -> para Testing unitario. Se prueba del servicio para atras.
+	//TODO: no permitir crear dos carritos (con estado new) con el mismo mail
 	
 	
 	@Override
@@ -108,6 +107,10 @@ public class CartServiceImpl implements CartService {
 		if(cartOpt.isPresent()) {
 			Cart cart = cartOpt.get();
 			
+			if (!cart.getStatus().equalsIgnoreCase("NEW")){
+				//si el cart no esta en estado "new" no se le permite agregar productos
+				throw new CartException(CartError.CART_STATUS_NOT_ALLOW_CHECKOUT); 
+			}
 			validateQuantity(cartProductDTO);
 			Product product = validateProduct(cartProductDTO);
 			
@@ -117,7 +120,8 @@ public class CartServiceImpl implements CartService {
 			prodInCart.setCart(cart);
 			prodInCart.setProduct(product);
 			prodInCart.setQuantity(cartProductDTO.getQuantity());
-			prodInCart.setUnitPrice(product.getUnitPrice());			
+			prodInCart.setUnitPrice(product.getUnitPrice());
+			prodInCart.setDescription(product.getDescription());
 			productInCartRepo.save(prodInCart);	
 			
 			BeanUtils.copyProperties(cart, cartDTO);
@@ -136,7 +140,6 @@ public class CartServiceImpl implements CartService {
 
 	@Override
 	public CartDTO deleteProductFromCart(Long cartId, Long productId) {
-		//FIXME: internal server error si un producto fue agregado mas de una vez al carrito
 		Optional<Cart> cartOpt = cartRepo.findById(cartId);
 		CartDTO cartDTO = new CartDTO();
 		if(cartOpt.isPresent()) {
@@ -153,36 +156,16 @@ public class CartServiceImpl implements CartService {
 				
 				productsToDelete.forEach(pr -> {
 					deductFromTotal(cart, pr.getUnitPrice(), pr.getQuantity());
-					productInCartRepo.delete(pr);
 					cart.removeProduct(pr);
+					productInCartRepo.delete(pr);
 					
 				});
-				//cartRepo.save(cart);
 				BeanUtils.copyProperties(cart, cartDTO);
 				cartDTO.setProducts(getProductDTOSetInCart(cart.getProductsInCart()));
 				
 			}else {
 				throw new ProductException(ProductError.PRODUCT_NOT_PRESENT);
-			}
-			
-			
-			
-			
-			/*
-			Optional<ProductInCart> productToDeleteOpt = productsInCart.stream().filter(p -> p.getProduct().getId().equals(productId)).findFirst();
-			if(productToDeleteOpt.isPresent()){
-				//TODO: delete product from cart, update Cart Total and delete entries from ProductInCart table. Add back the stock to Product
-				
-			
-				
-				
-				
-				BeanUtils.copyProperties(cart, cartDTO);
-				cartDTO.setProducts(getProductDTOSetInCart(productsInCart));
-			}else {
-				throw new ProductException(ProductError.PRODUCT_NOT_PRESENT);
-			}*/
-			
+			}															
 			
 		}else {
 			throw new CartException(CartError.CART_NOT_PRESENT);
@@ -193,12 +176,24 @@ public class CartServiceImpl implements CartService {
 
 
 
-
 	@Override
 	public Set<ProductInCartDTO> getProductsInCart(Long cartId) {
-		// TODO Auto-generated method stub
-		Set<ProductInCartDTO> productsInCart = new HashSet<>();
-		return productsInCart;
+		Set<ProductInCartDTO> productsInCartDTO = new HashSet<>();
+		Optional<Cart> cartOpt = cartRepo.findById(cartId);
+		if(cartOpt.isPresent()) {
+			Cart cart = cartOpt.get();
+			Set<ProductInCart> productsInCart = cart.getProductsInCart();
+			productsInCart.forEach(pr ->{
+				ProductInCartDTO prDTO = new ProductInCartDTO();
+				BeanUtils.copyProperties(pr, prDTO); //esto no copia el product id ya que las propiedades se llaman distinto 
+				prDTO.setProductId(pr.getProduct().getId());
+				productsInCartDTO.add(prDTO);
+			});
+		}else {
+			throw new CartException(CartError.CART_NOT_PRESENT);
+		}
+		
+		return productsInCartDTO;
 	}
 
 	@Override
@@ -223,8 +218,8 @@ public class CartServiceImpl implements CartService {
 		CartDTO cartDTO = new CartDTO();
 		if(cartOpt.isPresent()) {
 			Cart cart = cartOpt.get();
-			if(cart.getProductsInCart() != null && cart.getProductsInCart().size() > 0) {
-				//Solo se va poder pasar a "READY" un cart que tenga productos agregados y un total mayor a cero, si no tiene se va lanzar una excepcion
+			if(cart.getProductsInCart() != null && cart.getProductsInCart().size() > 0 && cart.getStatus().equalsIgnoreCase("NEW")) {
+				//Solo se va poder pasar a "READY" un cart que tenga productos agregados si no tiene se va lanzar una excepcion y también si no esta en el status "new"
 				cart.setStatus(CartStatus.READY.getStatus());
 				cartRepo.save(cart);
 				
@@ -285,7 +280,7 @@ public class CartServiceImpl implements CartService {
 			throw new CartException(CartError.PRODUCT_QUANTITY_REQUIRED);
 		}else if(cartProductDTO.getQuantity() < 1){
 			throw new CartException(CartError.PRODUCT_QUANTITY_INVALID);
-		}else {
+		} /*else {  //TODO: esto se chequea con otra excepcion
 			Optional<Product> prodOpt = productRepo.findById(cartProductDTO.getProductId());
 			if(prodOpt.isPresent()) {
 				Product product = prodOpt.get();
@@ -293,7 +288,7 @@ public class CartServiceImpl implements CartService {
 					throw new CartException(CartError.CART_INSUFFICIENT_PRODUCT_STOCK);
 				}
 			}
-		}
+		} */
 	}
 	
 	private void addToTotal(Cart cart, BigDecimal unitPrice, Integer quantity) {

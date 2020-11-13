@@ -25,7 +25,7 @@ public class ProductInCart {
 	@ManyToOne
 	@JoinColumn(name = "product_id")
 	private Product product;
-	
+	private String description;
 	private Integer quantity;
 	private BigDecimal unitPrice; //para preservar el precio del producto al momento de agregarlo al cart
 	
@@ -120,6 +120,14 @@ public class ProductInCart {
 		} else if (!unitPrice.equals(other.unitPrice))
 			return false;
 		return true;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 	
 	

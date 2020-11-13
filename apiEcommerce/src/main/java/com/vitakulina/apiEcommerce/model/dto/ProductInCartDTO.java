@@ -49,6 +49,9 @@ public class ProductInCartDTO {
 		this.unitPrice = unitPrice;
 	}
 
+	/*
+	 * 
+	 *  //El equals de abajo permite mostrar solo una vez los prods que fueron agregados varias veces, pero eso no muestra la quantity real
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -72,7 +75,7 @@ public class ProductInCartDTO {
 		} else if (!productId.equals(other.productId))
 			return false;
 		return true;
-	}
+	} */
 	
 	
 	
