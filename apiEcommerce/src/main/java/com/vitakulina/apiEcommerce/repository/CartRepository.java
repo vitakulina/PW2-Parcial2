@@ -10,6 +10,7 @@ public interface CartRepository extends JpaRepository<Cart, Long>{
 	
 	List<Cart> findByStatusIgnoreCase(String status);
 	List<Cart> findByEmailIgnoreCase(String email);
+	List<Cart> findByEmailAndStatusAllIgnoreCase(String email, String status);
 	
 
 }

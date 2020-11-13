@@ -81,16 +81,22 @@ public class CartServiceImpl implements CartService {
 	@Transactional
 	public CartDTO postNewCart(UserCartDTO userDetails) {
 		validateUserDetails(userDetails);
+		//chequea si ya hay un cart en New status para el mismo mail
 		Cart cart = new Cart();
-		cart.setFullName(userDetails.getFullName());
-		cart.setEmail(userDetails.getEmail());
-		cart.setCreationDate(LocalDate.now());
-		cart.setTotal(BigDecimal.ZERO);
-		cart.setStatus(CartStatus.NEW.getStatus());
-		cart.setProductsInCart(new HashSet<ProductInCart>());
-		
-		cartRepo.save(cart);
-		
+		List<Cart> cartExistent = cartRepo.findByEmailAndStatusAllIgnoreCase(userDetails.getEmail(), "NEW");
+		if(cartExistent != null && cartExistent.size() > 0) {
+			cart = cartExistent.get(0);
+		}else {			
+			cart.setFullName(userDetails.getFullName());
+			cart.setEmail(userDetails.getEmail());
+			cart.setCreationDate(LocalDate.now());
+			cart.setTotal(BigDecimal.ZERO);
+			cart.setStatus(CartStatus.NEW.getStatus());
+			cart.setProductsInCart(new HashSet<ProductInCart>());
+			
+			cartRepo.save(cart);
+		}
+				
 		CartDTO cartDTO = new CartDTO();
 		BeanUtils.copyProperties(cart, cartDTO);
 		cartDTO.setProducts(new HashSet<ProductDTO>());
@@ -310,7 +316,6 @@ public class CartServiceImpl implements CartService {
 	@Override
 	public List<CartDTO> getCartsByEmail(String email) {
 		// TODO Auto-generated method stub
-		//TEST git
 		return null;
 	}
 
