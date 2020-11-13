@@ -12,7 +12,8 @@ public enum ProductError {
 	PRODUCT_UNITPRICE_REQUIRED("PRODUCT_UNITPRICE_REQUIRED", "Product unitprice is required", HttpStatus.BAD_REQUEST),
 	PRODUCT_UNITPRICE_INVALID("PRODUCT_UNITPRICE_INVALID", "Product unitprice must be greater than 0", HttpStatus.BAD_REQUEST),
 	PRODUCT_PRESENT_IN_CART("PRODUCT_PRESENT_IN_CART", "Product is present in carts. Deletion is not possible", HttpStatus.CONFLICT),
-	NO_PRODUCTS_AVAILABLE("NO_PRODUCTS_AVAILABLE", "There are no products available in repository", HttpStatus.NOT_FOUND);
+	NO_PRODUCTS_AVAILABLE("NO_PRODUCTS_AVAILABLE", "There are no products available in repository", HttpStatus.NOT_FOUND),
+	PRODUCT_STOCK_INSUFFICIENT("PRODUCT_STOCK_INSUFFICIENT", "Product stock insufficient", HttpStatus.CONFLICT);
 	
 	private final String errCode;
 	private final String errMessage;

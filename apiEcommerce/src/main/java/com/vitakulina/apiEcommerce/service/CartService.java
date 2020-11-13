@@ -1,6 +1,7 @@
 package com.vitakulina.apiEcommerce.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public interface CartService {
 	CartDTO getCart(Long cartId);
 	CartDTO postCheckoutCart(Long cartId);
 	List<CartDTO> getCartsByEmail(String email);
-	List<CartDTO> getCartByStatus(String string);
+	List<CartDTO> getCartsByStatus(Optional<String> string);
 	
 	
 }

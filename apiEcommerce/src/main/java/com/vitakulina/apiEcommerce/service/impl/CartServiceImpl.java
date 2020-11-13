@@ -317,14 +317,31 @@ public class CartServiceImpl implements CartService {
 
 
 	@Override
-	public List<CartDTO> getCartByStatus(String status) {
+	public List<CartDTO> getCartsByStatus(Optional<String> statusOpt) {
 		//check if status is available and if so, check if it's valid (available in the enum)
-		
-		status.toUpperCase();
-		EnumUtils.isValidEnum(CartStatus.class, status);
-		
-		// TODO Auto-generated method stub
-		return new ArrayList<CartDTO>() ;
+		if(statusOpt.isPresent()) {
+			List<CartDTO> cartsDTO = new ArrayList<CartDTO>();
+			String status = statusOpt.get();
+			if(EnumUtils.isValidEnum(CartStatus.class, status.toUpperCase())) {
+				//obtener carts con el status valido
+				List<Cart>carts = cartRepo.findByStatusIgnoreCase(status);
+				if(carts != null) {
+					carts.forEach(c ->{
+						CartDTO cartDTO = new CartDTO();
+						BeanUtils.copyProperties(c, cartDTO);
+						cartDTO.setProducts(getProductDTOSetInCart(c.getProductsInCart()));
+						cartsDTO.add(cartDTO);
+					});
+				}
+				
+				return cartsDTO;
+			}else {
+				throw new CartException(CartError.CART_STATUS_NOT_SUPPORTED);
+			}
+			
+		}else {
+			return getAllCarts();
+		}		
 	}
 
 

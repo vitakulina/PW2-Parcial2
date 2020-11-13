@@ -1,6 +1,7 @@
 package com.vitakulina.apiEcommerce.controller;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -75,6 +76,12 @@ public class CartsController {
 	@PostMapping(value="/carts/{id}/checkout")
 	public ResponseEntity<CartDTO> checkoutCart(@PathVariable(value="id") Long id){
 		return new ResponseEntity<>(cartService.postCheckoutCart(id), HttpStatus.OK);
+	}
+	
+	@GetMapping(value= {"/carts/status", "/carts/status/{status}"})
+	public ResponseEntity<List<CartDTO>> viewCartsByStatus(@PathVariable(value="status") Optional<String> status){
+		List<CartDTO> carts = cartService.getCartsByStatus(status);
+		return new ResponseEntity<>(carts, HttpStatus.OK);
 	}
 	
 
