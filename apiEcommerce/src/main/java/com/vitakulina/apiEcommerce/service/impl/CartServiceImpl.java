@@ -286,15 +286,15 @@ public class CartServiceImpl implements CartService {
 			throw new CartException(CartError.PRODUCT_QUANTITY_REQUIRED);
 		}else if(cartProductDTO.getQuantity() < 1){
 			throw new CartException(CartError.PRODUCT_QUANTITY_INVALID);
-		} /*else {  //TODO: esto se chequea con otra excepcion
+		} else {  //TODO: esto se chequea con otra excepcion
 			Optional<Product> prodOpt = productRepo.findById(cartProductDTO.getProductId());
 			if(prodOpt.isPresent()) {
 				Product product = prodOpt.get();
 				if(product.getStock() < cartProductDTO.getQuantity()) {
-					throw new CartException(CartError.CART_INSUFFICIENT_PRODUCT_STOCK);
+					throw new ProductException(ProductError.PRODUCT_STOCK_INSUFFICIENT);
 				}
 			}
-		} */
+		} 
 	}
 	
 	private void addToTotal(Cart cart, BigDecimal unitPrice, Integer quantity) {
