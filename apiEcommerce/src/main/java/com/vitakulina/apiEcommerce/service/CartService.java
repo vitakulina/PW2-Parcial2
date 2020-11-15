@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 import com.vitakulina.apiEcommerce.model.dto.CartDTO;
+import com.vitakulina.apiEcommerce.model.dto.CartDTOWithHttpStatus;
 import com.vitakulina.apiEcommerce.model.dto.CartProductDTO;
 import com.vitakulina.apiEcommerce.model.dto.ProductInCartDTO;
 import com.vitakulina.apiEcommerce.model.dto.UserCartDTO;
@@ -15,7 +16,7 @@ import com.vitakulina.apiEcommerce.model.dto.UserCartDTO;
 public interface CartService {
 	
 	List<CartDTO>getAllCarts();
-	CartDTO postNewCart(UserCartDTO userDetails);
+	CartDTOWithHttpStatus postNewCart(UserCartDTO userDetails);
 	CartDTO postProductToCart(Long cartId, CartProductDTO cartProductDTO);
 	CartDTO deleteProductFromCart(Long cartId, Long productId);
 	Set<ProductInCartDTO> getProductsInCart(Long cartId);

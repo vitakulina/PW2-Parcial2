@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import com.vitakulina.apiEcommerce.model.Cart;
 import com.vitakulina.apiEcommerce.model.Product;
 import com.vitakulina.apiEcommerce.model.ProductInCart;
 import com.vitakulina.apiEcommerce.model.dto.CartDTO;
+import com.vitakulina.apiEcommerce.model.dto.CartDTOWithHttpStatus;
 import com.vitakulina.apiEcommerce.model.dto.CartProductDTO;
 import com.vitakulina.apiEcommerce.model.dto.CartStatus;
 import com.vitakulina.apiEcommerce.model.dto.ProductDTO;
@@ -54,6 +56,7 @@ public class CartServiceImpl implements CartService {
 
 	//TODO: el descuento de stock en el producto se va hacer en el checkout de los carritos, no antes. En el proyecto lo vamos a hacer en batch. Se van a tomar todos los carritos en ready y ahi se van a procesar, se va descontar el stock y se pone en Finalizado el carrito.
 	//TODO: no permitir crear dos carritos (con estado new) con el mismo mail
+	//TODO: cambiar como funciona agregar productos -> no generar nuevos ProductInCart si se agrega el mismo producto, solo debe actualizar la cantidad en la db de ProdInCart
 	
 	
 	@Override
@@ -79,13 +82,15 @@ public class CartServiceImpl implements CartService {
 	
 	@Override
 	@Transactional
-	public CartDTO postNewCart(UserCartDTO userDetails) {
-		validateUserDetails(userDetails);
-		//chequea si ya hay un cart en New status para el mismo mail
+	public CartDTOWithHttpStatus postNewCart(UserCartDTO userDetails) {
+		validateUserDetails(userDetails);		
 		Cart cart = new Cart();
+		CartDTOWithHttpStatus cartWithStatus = new CartDTOWithHttpStatus();
+		//chequea si ya hay un cart en New status para el mismo mail:
 		List<Cart> cartExistent = cartRepo.findByEmailAndStatusAllIgnoreCase(userDetails.getEmail(), "NEW");
 		if(cartExistent != null && cartExistent.size() > 0) {
-			cart = cartExistent.get(0);
+			cart = cartExistent.get(0); // TODO: si ya existe, deberiamos devolver status 200 en vez de 201
+			cartWithStatus.setHttpStatus(HttpStatus.OK);
 		}else {			
 			cart.setFullName(userDetails.getFullName());
 			cart.setEmail(userDetails.getEmail());
@@ -95,13 +100,15 @@ public class CartServiceImpl implements CartService {
 			cart.setProductsInCart(new HashSet<ProductInCart>());
 			
 			cartRepo.save(cart);
+			cartWithStatus.setHttpStatus(HttpStatus.CREATED);
 		}
 				
 		CartDTO cartDTO = new CartDTO();
 		BeanUtils.copyProperties(cart, cartDTO);
 		cartDTO.setProducts(new HashSet<ProductDTO>());
+		cartWithStatus.setCartDTO(cartDTO);
 		
-		return cartDTO;	
+		return cartWithStatus;	
 	}
 	
 
@@ -286,7 +293,7 @@ public class CartServiceImpl implements CartService {
 			throw new CartException(CartError.PRODUCT_QUANTITY_REQUIRED);
 		}else if(cartProductDTO.getQuantity() < 1){
 			throw new CartException(CartError.PRODUCT_QUANTITY_INVALID);
-		} else {  //TODO: esto se chequea con otra excepcion
+		} else {  
 			Optional<Product> prodOpt = productRepo.findById(cartProductDTO.getProductId());
 			if(prodOpt.isPresent()) {
 				Product product = prodOpt.get();

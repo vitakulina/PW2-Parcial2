@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vitakulina.apiEcommerce.model.dto.CartDTO;
+import com.vitakulina.apiEcommerce.model.dto.CartDTOWithHttpStatus;
 import com.vitakulina.apiEcommerce.model.dto.CartProductDTO;
 import com.vitakulina.apiEcommerce.model.dto.ProductInCartDTO;
 import com.vitakulina.apiEcommerce.model.dto.UserCartDTO;
@@ -39,8 +40,8 @@ public class CartsController {
 	
 	@PostMapping(value="/carts")
 	public ResponseEntity<CartDTO> createCart(@Valid @RequestBody UserCartDTO userCartDTO){
-		CartDTO cart = cartService.postNewCart(userCartDTO);		
-		return new ResponseEntity<>(cart, HttpStatus.CREATED);	
+		CartDTOWithHttpStatus cartWithStatus = cartService.postNewCart(userCartDTO);	
+		return new ResponseEntity<>(cartWithStatus.getCartDTO(), cartWithStatus.getHttpStatus());	
 	}
 	
 	@PostMapping(value="/carts/{id}/products")
