@@ -55,9 +55,7 @@ public class CartServiceImpl implements CartService {
 
 
 	//TODO: el descuento de stock en el producto se va hacer en el checkout de los carritos, no antes. En el proyecto lo vamos a hacer en batch. Se van a tomar todos los carritos en ready y ahi se van a procesar, se va descontar el stock y se pone en Finalizado el carrito.
-	//TODO: no permitir crear dos carritos (con estado new) con el mismo mail
-	//TODO: cambiar como funciona agregar productos -> no generar nuevos ProductInCart si se agrega el mismo producto, solo debe actualizar la cantidad en la db de ProdInCart
-	
+
 	
 	@Override
 	public List<CartDTO> getAllCarts() {
@@ -105,7 +103,12 @@ public class CartServiceImpl implements CartService {
 				
 		CartDTO cartDTO = new CartDTO();
 		BeanUtils.copyProperties(cart, cartDTO);
-		cartDTO.setProducts(new HashSet<ProductDTO>());
+		if(cartWithStatus.getHttpStatus().equals(HttpStatus.OK)) {
+			//si es un carrito existente, hay que mostrar la lista de productos que tiene
+			cartDTO.setProducts(getProductDTOSetInCart(cart.getProductsInCart()));
+		}else {
+			cartDTO.setProducts(new HashSet<ProductDTO>());
+		}		
 		cartWithStatus.setCartDTO(cartDTO);
 		
 		return cartWithStatus;	
@@ -129,18 +132,29 @@ public class CartServiceImpl implements CartService {
 			
 			addToTotal(cart, product.getUnitPrice(), cartProductDTO.getQuantity());
 			
-			ProductInCart prodInCart = new ProductInCart(); 
-			prodInCart.setCart(cart);
-			prodInCart.setProduct(product);
-			prodInCart.setQuantity(cartProductDTO.getQuantity());
-			prodInCart.setUnitPrice(product.getUnitPrice());
-			prodInCart.setDescription(product.getDescription());
-			productInCartRepo.save(prodInCart);	
+			//chequea si el producto ya esta en el carrito, si no está lo crea y si está le suma la cantidad
+			Set<ProductInCart> productsInCart = cart.getProductsInCart();
+			Optional<ProductInCart> prodInCartOpt = productsInCart.stream().filter(p -> p.getProduct().getId().equals(cartProductDTO.getProductId())).findFirst();
+			if(prodInCartOpt.isPresent()) {
+				ProductInCart prodInCartExistent = prodInCartOpt.get();
+				Integer newQuantity = prodInCartExistent.getQuantity() + cartProductDTO.getQuantity();
+				prodInCartExistent.setQuantity(newQuantity);
+				productInCartRepo.save(prodInCartExistent); //actualiza en DB la tabla product_cart con nuevo quantity para el mismo objeto
+			}else {
+				ProductInCart prodInCart = new ProductInCart(); 
+				prodInCart.setCart(cart);
+				prodInCart.setProduct(product);
+				prodInCart.setQuantity(cartProductDTO.getQuantity());
+				prodInCart.setUnitPrice(product.getUnitPrice());
+				prodInCart.setDescription(product.getDescription());
+				productInCartRepo.save(prodInCart);	//actualiza en DB la tabla product_cart creando un nuevo objeto	
+				cart.addProduct(prodInCart);
+			}			
+			//cartRepo.save(cart); //sin este guardado extra no se actualizaba a tiempo la lista de productos en cart y al agregar no devolvia el cart completo
 			
 			BeanUtils.copyProperties(cart, cartDTO);
 			
-			Set<ProductInCart> productsInCart = cart.getProductsInCart();
-			Set<ProductDTO> productsDTO = getProductDTOSetInCart(productsInCart);					
+			Set<ProductDTO> productsDTO = getProductDTOSetInCart(cart.getProductsInCart());					
 			cartDTO.setProducts(productsDTO); 
 		}else {
 			throw new CartException(CartError.CART_NOT_PRESENT);
@@ -322,8 +336,17 @@ public class CartServiceImpl implements CartService {
 
 	@Override
 	public List<CartDTO> getCartsByEmail(String email) {
-		// TODO Auto-generated method stub
-		return null;
+		List<Cart> carts = cartRepo.findByEmailIgnoreCase(email);
+		List<CartDTO> cartsDTO = new ArrayList<CartDTO>();
+		if(carts != null) {
+			carts.forEach(c ->{
+				CartDTO cartDTO = new CartDTO();
+				BeanUtils.copyProperties(c, cartDTO);
+				cartDTO.setProducts(getProductDTOSetInCart(c.getProductsInCart()));
+				cartsDTO.add(cartDTO);
+			});			
+		}
+		return cartsDTO; //si no hay carts para el mail que se paso, va retornar una lista vacia, también si el mail es invalido, por ahora eso funciona de la misma manera
 	}
 
 
