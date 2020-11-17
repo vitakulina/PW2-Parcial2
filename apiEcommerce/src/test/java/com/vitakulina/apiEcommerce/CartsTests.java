@@ -1,21 +1,31 @@
 package com.vitakulina.apiEcommerce;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vitakulina.apiEcommerce.model.Cart;
 import com.vitakulina.apiEcommerce.model.dto.CartDTO;
+import com.vitakulina.apiEcommerce.model.dto.CartDTOWithHttpStatus;
+import com.vitakulina.apiEcommerce.model.dto.CartProductDTO;
+import com.vitakulina.apiEcommerce.model.dto.ProductDTO;
 import com.vitakulina.apiEcommerce.model.dto.UserCartDTO;
 import com.vitakulina.apiEcommerce.repository.CartRepository;
 import com.vitakulina.apiEcommerce.service.CartService;
+import com.vitakulina.apiEcommerce.service.ProductService;
 import com.vitakulina.apiEcommerce.service.business.exception.CartException;
 
-
+//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 @Transactional
 public class CartsTests {
@@ -24,7 +34,34 @@ public class CartsTests {
 	private CartService cartService;
 	
 	@Autowired
-	private CartRepository cartRepo;
+	private  CartRepository cartRepo;
+	
+	@Autowired 
+	private ProductService productService;
+	
+	private static List<CartDTO> allCarts;
+	
+	@BeforeEach
+	public void init() {
+		ProductDTO productDTO = new ProductDTO();
+		productDTO.setDescription("Dune");
+		productDTO.setStock(20);
+		productDTO.setUnitPrice(new BigDecimal(300));
+		productDTO = productService.post(productDTO);
+		Long prodId = productDTO.getId();
+		
+		CartDTOWithHttpStatus cartDTO = cartService.postNewCart(new UserCartDTO("Vita Kulina", "vita@mail.com")); 
+		Long idCart1 = cartDTO.getCartDTO().getId();
+		cartService.postProductToCart(idCart1, new CartProductDTO(prodId, 2));
+		cartService.postCheckoutCart(idCart1);
+		
+		CartDTOWithHttpStatus cartDTO2 = cartService.postNewCart(new UserCartDTO("Vita Kulina", "vita@mail.com"));
+		Long idCart2 = cartDTO2.getCartDTO().getId();
+		cartService.postProductToCart(idCart2, new CartProductDTO(prodId, 1));
+		
+		setAllCarts(cartService.getAllCarts());
+	}
+	
 	
 	@Test
 	@DisplayName("╯°□°）╯")
@@ -34,6 +71,73 @@ public class CartsTests {
 		});
 		
 	}
+	
+	@Test
+	@DisplayName("Test new cart de Vita")
+	void testCart() {
+		List<Cart> cartVita = cartRepo.findByEmailAndStatusAllIgnoreCase("vita@mail.com", "New");
+		Assertions.assertEquals(1, cartVita.size());
+		Assertions.assertNotEquals("Ready", cartVita.get(0).getStatus());
+	}
+	
+	
+	@Test
+	@DisplayName("Que existan 2 carritos")
+	void testOnlyTwoCartsShouldExist() {
+		Assertions.assertEquals(2, getAllCarts().size());
+	}
+	
+	
+	@Test
+	@DisplayName("Que exista solo un carrito Ready")
+	void testOnlyOneProcessedCart() {
+		List <CartDTO> carts = cartService.getCartsByStatus(Optional.of("Ready"));
+		System.out.println(carts.size());
+		Assertions.assertEquals(1, carts.size());
+	}
+	
+	@Test
+	@DisplayName("Que exista solo un carrito New")
+	void testOnlyOneNewCart() {
+
+		Assertions.assertEquals(1, cartService.getCartsByStatus(Optional.of("New")).size());
+	}
+	
+	@Test
+	@DisplayName("Que no exista ningun carrito con Failed")
+	void testNoFailedCart() {
+
+		Assertions.assertEquals(0, cartService.getCartsByStatus(Optional.of("Failed")).size());
+	}
+	
+	@Test
+	@DisplayName("Que no exista ningun carrito con Processed")
+	void testNoProcessedCart() {
+
+		Assertions.assertEquals(0, cartService.getCartsByStatus(Optional.of("Processed")).size());
+	}
+	
+	@Test
+	@DisplayName("Que lance una excepcion si el status no es el esperado - Nuevo")
+	void testExceptionWhenUsingInvalidStatus() {
+		Assertions.assertThrows(CartException.class, () -> {
+			cartService.getCartsByStatus(Optional.of("Nuevo"));
+		});
+
+	}
+
+
+	public List<CartDTO> getAllCarts() {
+		return allCarts;
+	}
+
+
+	public void setAllCarts(List<CartDTO> allCarts) {
+		CartsTests.allCarts = allCarts;
+	}
+	
+	
+	
 	/*
 	
 	@Test

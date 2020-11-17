@@ -12,6 +12,12 @@ public class CartProductDTO {
 	public CartProductDTO(){
 		super();
 	}
+	
+	public CartProductDTO(Long productId, Integer quantity){
+		super();
+		this.productId = productId;
+		this.quantity = quantity;
+	}
 
 	public Long getProductId() {
 		return productId;
