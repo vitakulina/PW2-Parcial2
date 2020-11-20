@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vitakulina.apiEcommerce.model.dto.UserDTO;
-import com.vitakulina.apiEcommerce.service.UserService;
+import com.vitakulina.apiEcommerce.service.impl.UserServiceImpl;
 
 @RestController
 public class UserController {
 	
-	private UserService userService;
+	private UserServiceImpl userService;
 	
-	public UserController(UserService userService) {
+	public UserController(UserServiceImpl userService) {
 		super();
 		this.userService = userService;
 	}

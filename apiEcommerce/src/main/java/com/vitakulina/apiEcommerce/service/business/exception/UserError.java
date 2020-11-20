@@ -12,6 +12,7 @@ public enum UserError {
 	USER_FIRSTNAME_REQUIRED("USER_FIRSTNAME_REQUIRED", "Firstname is a required field", HttpStatus.BAD_REQUEST),
 	USER_LASTNAME_REQUIRED("USER_LASTNAME_REQUIRED", "Lastname is a required field", HttpStatus.BAD_REQUEST),
 	USER_LOGIN_INVALID("USER_LOGIN_INVALID", "The provided login credentials are invalid", HttpStatus.BAD_REQUEST),
+	USER_NOT_FOUND("USER_NOT_FOUND", "User not found", HttpStatus.NOT_FOUND),
 	INVALID_EMAIL_FORMAT("INVALID_EMAIL_FORMAT", "Invalid email format. Please provide a valid email", HttpStatus.BAD_REQUEST),
 	INVALID_USERNAME_FORMAT("INVALID_USERNAME_FORMAT", "Username should have between 4 and 128 characters", HttpStatus.BAD_REQUEST),
 	INVALID_PASSWORD_FORMAT("INVALID_PASSWORD_FORMAT", "Password should be between 8 and 32 characters and contain at least one number and one letter. No special characters except (.-_) are allowed.", HttpStatus.BAD_REQUEST);
