@@ -142,7 +142,7 @@ public class CartsTests {
 	
 	@Test
 	public void whenCartIsRequestWithValidStatusThenRespondOk() {
-		//TODO: hacer la implementacion real de getCartByStatus y cambiar el assertTrue de acuerdo a lo que hay en la DB
+		
 		List<CartDTO> result = cartService.getCartByStatus("NEW");
 		Assertions.assertTrue(result.isEmpty()); //testeamos que no haya ningun carrito new (en este caso esta hardcodeado el servicio a devolver null)
 		
@@ -151,7 +151,7 @@ public class CartsTests {
 	
 	@Test
 	public void whenCartIsRequestWithInvalidStatusThenThrowException() {
-		//TODO: implementarlo de verdad y esparar la excepcion correspondiente (todavia no esta creado ese error)
+		
 		List<CartDTO> result = cartService.getCartByStatus("NUEVO");
 		Assertions.assertTrue(result.isEmpty()); //testeamos que no haya ningun carrito new (en este caso esta hardcodeado el servicio a devolver null)
 		
@@ -170,7 +170,7 @@ public class CartsTests {
 		
 		String status = null;
 		List<CartDTO> result = cartService.getCartByStatus(status);
-		Assertions.assertTrue(result.size() == 2); //TODO: implementar el test de verdad
+		Assertions.assertTrue(result.size() == 2);
 		
 	}
 	*/

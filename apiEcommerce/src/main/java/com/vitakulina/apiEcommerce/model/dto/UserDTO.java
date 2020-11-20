@@ -1,6 +1,6 @@
 package com.vitakulina.apiEcommerce.model.dto;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class UserDTO {
 	
@@ -8,11 +8,15 @@ public class UserDTO {
 	private String username;
 	private String password;
 	
-	/*
+	
 	private String firstName;
 	private String lastName;
-	private String email;	
-	*/
+	private String email;
+	@JsonIgnore //TODO: considerar si mostrar el estado o no
+	private AccountState state;
+	@JsonIgnore 
+	private Integer loginAttempts;
+	
 	
 	public UserDTO() {
 		super();
@@ -35,7 +39,7 @@ public class UserDTO {
 		this.password = password;
 	}
 
-	/*
+	
 	public String getFirstName() {
 		return firstName;
 	}
@@ -58,7 +62,27 @@ public class UserDTO {
 
 	public void setEmail(String email) {
 		this.email = email;
-	} */
+	}
+
+
+	public AccountState getState() {
+		return state;
+	}
+
+
+	public void setState(AccountState state) {
+		this.state = state;
+	}
+
+
+	public Integer getLoginAttempts() {
+		return loginAttempts;
+	}
+
+
+	public void setLoginAttempts(Integer loginAttempts) {
+		this.loginAttempts = loginAttempts;
+	} 
 
 	
 	
