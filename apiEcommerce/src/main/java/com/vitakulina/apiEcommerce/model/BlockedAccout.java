@@ -1,7 +1,8 @@
 package com.vitakulina.apiEcommerce.model;
 
-import java.time.LocalDate;
 
+
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -9,6 +10,7 @@ import javax.persistence.ManyToOne;
 
 import com.vitakulina.apiEcommerce.model.dto.RecoveryKeyState;
 
+@Entity
 public class BlockedAccout {
 	@Id
 	@GeneratedValue
@@ -17,7 +19,7 @@ public class BlockedAccout {
 	@ManyToOne
 	@JoinColumn(name="user_id")
 	private User user;
-	private String recoveryKey;
+	private String key;
 	private RecoveryKeyState keyState;
 	
 	
@@ -47,12 +49,12 @@ public class BlockedAccout {
 
 
 	public String getRecoveryKey() {
-		return recoveryKey;
+		return key;
 	}
 
 
 	public void setRecoveryKey(String recoveryKey) {
-		this.recoveryKey = recoveryKey;
+		this.key = recoveryKey;
 	}
 
 

@@ -336,7 +336,7 @@ public class UserServiceImpl implements UserService {
 
 
 	public void recoverAccount(String key) {
-		Optional<BlockedAccout> accOpt = blockedAccountRepo.findByRecoveryKey(key);
+		Optional<BlockedAccout> accOpt = blockedAccountRepo.findByKey(key);
 		if(accOpt.isPresent()) {
 			BlockedAccout account = accOpt.get();
 			if(account.getKeyState().equals(RecoveryKeyState.NEW)) {

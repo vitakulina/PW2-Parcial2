@@ -8,5 +8,5 @@ import com.vitakulina.apiEcommerce.model.BlockedAccout;
 
 public interface BlockedAccoutRepository extends JpaRepository <BlockedAccout, Long> {
 
-	Optional<BlockedAccout> findByRecoveryKey(String key);
+	Optional<BlockedAccout> findByKey(String key);
 }
