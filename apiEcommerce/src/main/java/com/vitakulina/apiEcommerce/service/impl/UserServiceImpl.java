@@ -16,11 +16,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.vitakulina.apiEcommerce.model.BlockedAccout;
 import com.vitakulina.apiEcommerce.model.User;
+import com.vitakulina.apiEcommerce.model.dto.RecoveryKeyState;
 import com.vitakulina.apiEcommerce.model.dto.UserCreateDTO;
 import com.vitakulina.apiEcommerce.model.dto.UserDTO;
 import com.vitakulina.apiEcommerce.model.dto.UserRecoveryDTO;
 import com.vitakulina.apiEcommerce.model.dto.UserUpdateDTO;
+import com.vitakulina.apiEcommerce.repository.BlockedAccoutRepository;
 import com.vitakulina.apiEcommerce.repository.UserRepository;
 import com.vitakulina.apiEcommerce.security.JwtRequest;
 import com.vitakulina.apiEcommerce.service.UserService;
@@ -49,9 +52,12 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired JwtUserDetailsServiceImpl jwtUserDetailService;
 	
-	public UserServiceImpl(UserRepository userRepo) {
+	private BlockedAccoutRepository blockedAccountRepo;
+	
+	public UserServiceImpl(UserRepository userRepo, BlockedAccoutRepository blockedAccountRepo) {
 		super();
 		this.userRepo = userRepo;
+		this.blockedAccountRepo = blockedAccountRepo;
 	}
 
 
@@ -302,6 +308,7 @@ public class UserServiceImpl implements UserService {
 			
 			message.setMessage(getBodyRecovery(key));
 			
+			updateBlockedAccout(user, key);
 		
 		}else {
 			throw new UserException(UserError.USER_NOT_PRESENT);
@@ -315,6 +322,15 @@ public class UserServiceImpl implements UserService {
 				"siguiente link:"
 				+ "http://localhost:8080/users/recovery/" + id;
 		return body;
+	}
+	
+	void updateBlockedAccout(User user, String key) {
+		BlockedAccout account = new BlockedAccout();
+		account.setUser(user);
+		account.setRecoveryKey(key);
+		account.setKeyState(RecoveryKeyState.NEW);
+		blockedAccountRepo.save(account);
+		
 	}
 
 }

@@ -17,7 +17,6 @@ public class BlockedAccout {
 	@ManyToOne
 	@JoinColumn(name="user_id")
 	private User user;
-	private LocalDate blockDate; 
 	private String recoveryKey;
 	private RecoveryKeyState keyState;
 	
@@ -44,16 +43,6 @@ public class BlockedAccout {
 
 	public void setUser(User user) {
 		this.user = user;
-	}
-
-
-	public LocalDate getBlockDate() {
-		return blockDate;
-	}
-
-
-	public void setBlockDate(LocalDate blockDate) {
-		this.blockDate = blockDate;
 	}
 
 
