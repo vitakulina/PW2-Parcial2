@@ -262,6 +262,8 @@ public class UserServiceImpl implements UserService {
 		
 	}
 	
+
+	
 	public static void validateEmail(String email) {
 			
 		 EmailValidator validator = EmailValidator.getInstance();
@@ -287,8 +289,8 @@ public class UserServiceImpl implements UserService {
 			User user = userOpt.get();
 			
 			String key = generateRecoveryID();
-			
-			String email = user.getUsername();
+			message.setKey(key);
+			message.setEmail(user.getUsername());
 			String subject;
 			
 			if(user.getIsBlocked().equalsIgnoreCase("true")) {
@@ -296,7 +298,10 @@ public class UserServiceImpl implements UserService {
 			}else {
 				subject = SUBJECT_FORGOT;
 			}
-			String body = getBodyRecovery(key);
+			message.setSubject(subject);
+			
+			message.setMessage(getBodyRecovery(key));
+			
 		
 		}else {
 			throw new UserException(UserError.USER_NOT_PRESENT);
@@ -306,8 +311,8 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	public String getBodyRecovery(String id) {
-		String body ="\"Para recuperar el usuario confirme la solicitud haciendo click en el\r\n" + 
-				"siguiente link:\n \n"
+		String body ="Para recuperar el usuario confirme la solicitud haciendo click en el" + 
+				"siguiente link:"
 				+ "http://localhost:8080/users/recovery/" + id;
 		return body;
 	}
