@@ -1,26 +1,67 @@
 package com.vitakulina.apiEcommerce.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserDTO {
 	
+	private Long id;
 	
 	private String username;
+	
+	@JsonIgnore
 	private String password;
 	
+	@JsonProperty("is_blocked")
+	private String isBlocked;
 	
-	private String firstName;
-	private String lastName;
-	private String email;
-	@JsonIgnore //TODO: considerar si mostrar el estado o no
-	private AccountState state;
-	@JsonIgnore 
+	@JsonProperty("is_active")
+	private String isActive;
+	
+
 	private Integer loginAttempts;
 	
 	
 	public UserDTO() {
 		super();
 	}
+
+
+	
+	public Long getId() {
+		return id;
+	}
+
+
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+
+
+	public String getIsBlocked() {
+		return isBlocked;
+	}
+
+
+
+	public void setIsBlocked(String isBlocked) {
+		this.isBlocked = isBlocked;
+	}
+
+
+
+	public String getIsActive() {
+		return isActive;
+	}
+
+
+
+	public void setIsActive(String isActive) {
+		this.isActive = isActive;
+	}
+
 
 
 	public String getUsername() {
@@ -37,41 +78,6 @@ public class UserDTO {
 
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-
-	public AccountState getState() {
-		return state;
-	}
-
-
-	public void setState(AccountState state) {
-		this.state = state;
 	}
 
 

@@ -5,7 +5,10 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.vitakulina.apiEcommerce.model.dto.UserCreateDTO;
 import com.vitakulina.apiEcommerce.model.dto.UserDTO;
+import com.vitakulina.apiEcommerce.model.dto.UserUpdateDTO;
+import com.vitakulina.apiEcommerce.security.JwtRequest;
 
 @Service
 public interface UserService {
@@ -13,11 +16,10 @@ public interface UserService {
 	List<UserDTO> getAllUsers();
 	UserDTO getUserById(Long id);
 	UserDTO getUserByUsername(String username);
-	UserDTO getUserByEmail(String email);
-	UserDTO postRegisterUser(UserDTO userDTO);
-	UserDTO putUpdateUser(UserDTO userDTO);
-	List<UserDTO> getUsersByState(String state); //Por ej todos los usuarios bloqueados
+	UserDTO postRegisterUser(UserCreateDTO userCreateDTO);
+	UserDTO putUpdateUser(Long id, UserUpdateDTO userDTO);
 	UserDTO deleteUser(Optional<Long> idOpt);
+	void validateLogin(JwtRequest jwtRequest);
 		
 
 }

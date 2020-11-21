@@ -21,9 +21,10 @@ public class JwtUserDetailsServiceImpl implements JwtUserDetailsService {
 	@Autowired
 	private UserRepository userRepo;
 	
+	/*
 	@Autowired
 	private PasswordEncoder bcryptEncoder;
-	
+	*/
 	
 	
 	@Override
@@ -37,16 +38,15 @@ public class JwtUserDetailsServiceImpl implements JwtUserDetailsService {
 	}
 
 	
+	
+	
 	@Override
-	public User save(UserDTO userDto) {
-		User newUser = new User();
-		if(isValidUser(userDto)) {
-			newUser.setUsername(userDto.getUsername());
-			newUser.setPassword(bcryptEncoder.encode(userDto.getPassword()));
-		}
-		return userRepo.save(newUser);
+	public User save(User user) {
 		
+
+		return userRepo.save(user);
 		
+	} 
 		
 		/*
 		String email = null;
@@ -68,7 +68,7 @@ public class JwtUserDetailsServiceImpl implements JwtUserDetailsService {
 			return userRepo.save(newUser);
 		}*/
 		
-	}
+	/*
 	
 	private boolean isValidUser(UserDTO userDto) {
 		//validate empty fields
@@ -79,9 +79,9 @@ public class JwtUserDetailsServiceImpl implements JwtUserDetailsService {
 		if(userDto.getUsername() == null || userDto.getUsername().trim().isEmpty()) {
 			throw new UserException(UserError.USER_USERNAME_REQUIRED);
 		}else if(userRepo.findByUsername(userDto.getUsername()) != null) {
-			throw new UserException(UserError.USER_DUPLICATE_USERNAME);
+			throw new UserException(UserError.USER_USERNAME_ALREADY_EXISTS);
 		}		
 		return true;
-	}
+	} */
 
 }

@@ -7,6 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vitakulina.apiEcommerce.model.dto.AccountState;
 
 @Entity
@@ -22,11 +23,13 @@ public class User {
 	@JsonIgnore
 	private String password;
 	
-		
-	private String firstName;
-	private String lastName;
-	private String email;
-	private AccountState state;
+	
+	private String isBlocked;
+	
+
+	private String isActive;
+	
+
 	private Integer loginAttempts;
 	
 	
@@ -38,19 +41,27 @@ public class User {
 		super();
 		this.username = username;
 		this.password = password;
-		//TODO: on creation set loginAttempt to zero.
 		this.loginAttempts = 0;
+		this.isActive = "true";
+		this.isBlocked = "false";
 	}
 	
-	public User(String username, String password, String firstName, String lastName, String email) {
-		super();
-		this.username = username;
-		this.password = password;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.email = email;
 
-		this.loginAttempts = 0;
+
+	public String getIsBlocked() {
+		return isBlocked;
+	}
+
+	public void setIsBlocked(String isBlocked) {
+		this.isBlocked = isBlocked;
+	}
+
+	public String getIsActive() {
+		return isActive;
+	}
+
+	public void setIsActive(String isActive) {
+		this.isActive = isActive;
 	}
 
 	public Long getId() {
@@ -78,37 +89,6 @@ public class User {
 	}
 
 	
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public AccountState getState() {
-		return state;
-	}
-
-	public void setState(AccountState state) {
-		this.state = state;
-	}
 
 	public Integer getLoginAttempts() {
 		return loginAttempts;
