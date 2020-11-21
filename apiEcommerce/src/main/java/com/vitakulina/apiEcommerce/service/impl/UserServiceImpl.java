@@ -333,4 +333,27 @@ public class UserServiceImpl implements UserService {
 		
 	}
 
+
+
+	public void recoverAccount(String key) {
+		Optional<BlockedAccout> accOpt = blockedAccountRepo.findByRecoveryKey(key);
+		if(accOpt.isPresent()) {
+			BlockedAccout account = accOpt.get();
+			if(account.getKeyState().equals(RecoveryKeyState.NEW)) {
+				account.setKeyState(RecoveryKeyState.USED);
+				User user = account.getUser();
+				user.clearLoginAttempts();
+				user.setIsBlocked("false");
+				blockedAccountRepo.save(account);
+				userRepo.save(user);
+			}else {
+				throw new UserException(UserError.USER_RECOVERY_INVALID);
+			}
+			
+		}else {
+			throw new UserException(UserError.USER_RECOVERY_INVALID);
+		}
+		
+	}
+
 }

@@ -70,6 +70,12 @@ public class UserController {
 		return new ResponseEntity<>(message, HttpStatus.OK);
 		
 	}
+	
+	@PostMapping(value="/users/recovery/process{key}")
+	public ResponseEntity<?>  processRecovery(@PathVariable(value="key") String key){
+		userService.recoverAccount(key);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 
 
 }
