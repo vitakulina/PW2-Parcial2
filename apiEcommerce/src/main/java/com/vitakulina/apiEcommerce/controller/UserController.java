@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vitakulina.apiEcommerce.model.dto.UserCreateDTO;
 import com.vitakulina.apiEcommerce.model.dto.UserDTO;
+import com.vitakulina.apiEcommerce.model.dto.UserRecoveryDTO;
 import com.vitakulina.apiEcommerce.model.dto.UserUpdateDTO;
 import com.vitakulina.apiEcommerce.service.impl.UserRecoveryServiceImpl;
 import com.vitakulina.apiEcommerce.service.impl.UserServiceImpl;
@@ -61,6 +62,13 @@ public class UserController {
 	@DeleteMapping(value = {"/users", "/users/{id}"})
 	public ResponseEntity<UserDTO> deleteUser(@PathVariable(value="id") Optional<Long> id){
 		return new ResponseEntity<>(userService.deleteUser(id), HttpStatus.OK);
+	}
+	
+	@GetMapping(value="/users/recovery/send/{id}")
+	public ResponseEntity<UserRecoveryDTO> sendRecovery(@PathVariable(value="id") Long id){
+		UserRecoveryDTO message = userService.sendRecovery(id);
+		return new ResponseEntity<>(message, HttpStatus.OK);
+		
 	}
 
 

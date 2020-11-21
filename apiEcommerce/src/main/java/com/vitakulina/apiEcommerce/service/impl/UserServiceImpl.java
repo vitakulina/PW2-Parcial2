@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import java.util.UUID;
+
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.vitakulina.apiEcommerce.model.User;
 import com.vitakulina.apiEcommerce.model.dto.UserCreateDTO;
 import com.vitakulina.apiEcommerce.model.dto.UserDTO;
+import com.vitakulina.apiEcommerce.model.dto.UserRecoveryDTO;
 import com.vitakulina.apiEcommerce.model.dto.UserUpdateDTO;
 import com.vitakulina.apiEcommerce.repository.UserRepository;
 import com.vitakulina.apiEcommerce.security.JwtRequest;
@@ -26,8 +29,15 @@ import com.vitakulina.apiEcommerce.service.business.exception.UserException;
 
 
 
+
+
 @Service
 public class UserServiceImpl implements UserService {
+	
+	private final static String FROM = "accounts@tempano.com";
+	private final static String SUBJECT_BLOCKED = "Recuperacion de usuario bloqueado";
+	private final static String SUBJECT_FORGOT = "Recuperacion de password";
+	
 	
 	private UserRepository userRepo;
 	
@@ -262,5 +272,44 @@ public class UserServiceImpl implements UserService {
 	        		
 			
 		}
+	
+	public String generateRecoveryID(){
+		return UUID.randomUUID().toString();
+	}
+
+
+
+	public UserRecoveryDTO sendRecovery(Long id) {
+		
+		UserRecoveryDTO message = new UserRecoveryDTO();
+		Optional<User> userOpt = userRepo.findById(id);
+		if(userOpt.isPresent()) {
+			User user = userOpt.get();
+			
+			String key = generateRecoveryID();
+			
+			String email = user.getUsername();
+			String subject;
+			
+			if(user.getIsBlocked().equalsIgnoreCase("true")) {
+				subject = SUBJECT_BLOCKED;
+			}else {
+				subject = SUBJECT_FORGOT;
+			}
+			String body = getBodyRecovery(key);
+		
+		}else {
+			throw new UserException(UserError.USER_NOT_PRESENT);
+		}
+		
+		return message;
+	}
+	
+	public String getBodyRecovery(String id) {
+		String body ="\"Para recuperar el usuario confirme la solicitud haciendo click en el\r\n" + 
+				"siguiente link:\n \n"
+				+ "http://localhost:8080/users/recovery/" + id;
+		return body;
+	}
 
 }
