@@ -18,7 +18,7 @@ public class UserDTO {
 	@JsonProperty("is_active")
 	private String isActive;
 	
-
+	@JsonIgnore
 	private Integer loginAttempts;
 	
 	
