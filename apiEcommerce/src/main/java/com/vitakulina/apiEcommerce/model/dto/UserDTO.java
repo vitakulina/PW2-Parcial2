@@ -13,10 +13,10 @@ public class UserDTO {
 	private String password;
 	
 	@JsonProperty("is_blocked")
-	private String isBlocked;
+	private boolean isBlocked;
 	
 	@JsonProperty("is_active")
-	private String isActive;
+	private boolean isActive;
 	
 	@JsonIgnore
 	private Integer loginAttempts;
@@ -40,25 +40,25 @@ public class UserDTO {
 
 
 
-	public String getIsBlocked() {
+	public boolean getIsBlocked() {
 		return isBlocked;
 	}
 
 
 
-	public void setIsBlocked(String isBlocked) {
+	public void setIsBlocked(boolean isBlocked) {
 		this.isBlocked = isBlocked;
 	}
 
 
 
-	public String getIsActive() {
+	public boolean getIsActive() {
 		return isActive;
 	}
 
 
 
-	public void setIsActive(String isActive) {
+	public void setIsActive(boolean isActive) {
 		this.isActive = isActive;
 	}
 

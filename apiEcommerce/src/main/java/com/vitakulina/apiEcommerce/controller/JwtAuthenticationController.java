@@ -48,15 +48,10 @@ public class JwtAuthenticationController {
 		
 		//authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 		userService.validateLogin(authenticationRequest);
-		
-		
-		System.out.println("Autetication controller  ANTES de user details");
+				
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
 		
-		System.out.println("Autetication controller despues de user details");
 		final String token = jwtTokenUtil.generateToken(userDetails);
-		System.out.println("token:  ---------");
-		System.out.println(token);
 		
 		return new ResponseEntity<>(new JwtResponse(token), HttpStatus.OK);
 	}

@@ -41,6 +41,7 @@ public class UserServiceImpl implements UserService {
 	private final static String SUBJECT_BLOCKED = "Recuperacion de usuario bloqueado";
 	private final static String SUBJECT_FORGOT = "Recuperacion de password";
 	
+	// TODO: ajustar user delete y findall para borrado logico en vez de real
 	
 	private UserRepository userRepo;
 	
@@ -64,7 +65,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public List<UserDTO> getAllUsers() {
-		List<User> users = userRepo.findAll();
+		List<User> users = userRepo.findByIsActive(true); //debido al delete logico, no se puede usar findAll. Buscamos todos los activos
 		List<UserDTO> usersDTO = new ArrayList<>();
 		
 		if(users != null) {
@@ -156,7 +157,7 @@ public class UserServiceImpl implements UserService {
 		User user = userRepo.findByUsername(jwtRequest.getUsername());
 		if(user != null) {
 			//chequeamos primero si no está bloqueado
-			if(user.getIsBlocked().equalsIgnoreCase("true")) {
+			if(user.getIsBlocked()) {
 				throw new UserException(UserError.USER_IS_BLOCKED);
 			}
 			
@@ -173,7 +174,7 @@ public class UserServiceImpl implements UserService {
 				
 				//chequeamos si el usuario tiene 3 intentos y en ese caso bloqueamos
 				if(user.getLoginAttempts() > 2) {
-					user.setIsBlocked("true");	
+					user.setIsBlocked(true);	
 					userRepo.save(user);
 				}
 								
@@ -206,8 +207,15 @@ public class UserServiceImpl implements UserService {
 			Optional<User> userOpt = userRepo.findById(id);
 			if(userOpt.isPresent()) {
 				User user = userOpt.get();
+				if (!user.getIsActive()) {
+					//Debido al borrado logico, un usuario borrado va seguir estando pero como inactivo, no se debe permitir borrarlo de vuelta
+					throw new UserException(UserError.USER_NOT_PRESENT);
+				}
+				//delete logico
+				user.setIsActive(false);
+				userRepo.save(user);
 				BeanUtils.copyProperties(user, userDTO);
-				userRepo.delete(user);
+				//userRepo.delete(user);
 				
 			}else {
 				throw new UserException(UserError.USER_NOT_PRESENT);
@@ -299,7 +307,7 @@ public class UserServiceImpl implements UserService {
 			message.setEmail(user.getUsername());
 			String subject;
 			
-			if(user.getIsBlocked().equalsIgnoreCase("true")) {
+			if(user.getIsBlocked()) {
 				subject = SUBJECT_BLOCKED;
 			}else {
 				subject = SUBJECT_FORGOT;
@@ -320,7 +328,7 @@ public class UserServiceImpl implements UserService {
 	public String getBodyRecovery(String id) {
 		String body ="Para recuperar el usuario confirme la solicitud haciendo click en el" + 
 				"siguiente link:"
-				+ "http://localhost:8080/users/recovery/" + id;
+				+ "http://localhost:8081/users/recovery/" + id;
 		return body;
 	}
 	
@@ -343,7 +351,7 @@ public class UserServiceImpl implements UserService {
 				account.setKeyState(RecoveryKeyState.USED);
 				User user = account.getUser();
 				user.clearLoginAttempts();
-				user.setIsBlocked("false");
+				user.setIsBlocked(false);
 				blockedAccountRepo.save(account);
 				userRepo.save(user);
 			}else {
