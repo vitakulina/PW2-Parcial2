@@ -2,9 +2,11 @@ package com.vitakulina.apiEcommerce.model.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 
 public class CartDTO {
@@ -15,6 +17,10 @@ public class CartDTO {
 	
 	@JsonFormat(pattern="yyyy-MM-dd")
 	private LocalDate creationDate;
+	
+	@JsonInclude(JsonInclude.Include.NON_NULL) //al crearse el carrito no tiene checkoutDate, esto evita mostrar el null en Json hasta que se hace el checkout
+	@JsonFormat(pattern="yyyy-MM-dd hh:mm:ss")
+	private LocalDateTime checkoutDate;
 	
 	private Set<ProductDTO> products;
 	
@@ -83,6 +89,14 @@ public class CartDTO {
 	
 	public void addProduct(ProductDTO product) {
 		this.products.add(product);
+	}
+
+	public LocalDateTime getCheckoutDate() {
+		return checkoutDate;
+	}
+
+	public void setCheckoutDate(LocalDateTime checkoutDate) {
+		this.checkoutDate = checkoutDate;
 	}
 	
 	

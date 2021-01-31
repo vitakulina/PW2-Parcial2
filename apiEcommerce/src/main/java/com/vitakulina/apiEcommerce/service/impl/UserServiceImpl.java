@@ -41,7 +41,6 @@ public class UserServiceImpl implements UserService {
 	private final static String SUBJECT_BLOCKED = "Recuperacion de usuario bloqueado";
 	private final static String SUBJECT_FORGOT = "Recuperacion de password";
 	
-	// TODO: ajustar user delete y findall para borrado logico en vez de real
 	
 	private UserRepository userRepo;
 	
@@ -155,6 +154,7 @@ public class UserServiceImpl implements UserService {
 		validateMandatoryUserFields(userDTO);
 		
 		User user = userRepo.findByUsername(jwtRequest.getUsername());
+		// TODO: agregar un chequeo de si el usuario fue borrado logicamente (isActive seria false) y tirar la excepcion correspondiente (o permitir desbloquear?)
 		if(user != null) {
 			//chequeamos primero si no está bloqueado
 			if(user.getIsBlocked()) {

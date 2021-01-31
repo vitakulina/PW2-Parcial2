@@ -34,6 +34,7 @@ import com.vitakulina.apiEcommerce.service.business.exception.ProductException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 @Service
@@ -248,6 +249,7 @@ public class CartServiceImpl implements CartService {
 			if(cart.getProductsInCart() != null && cart.getProductsInCart().size() > 0 && cart.getStatus().equalsIgnoreCase("NEW")) {
 				//Solo se va poder pasar a "READY" un cart que tenga productos agregados si no tiene se va lanzar una excepcion y también si no esta en el status "new"
 				cart.setStatus(CartStatus.READY.getStatus());
+				cart.setCheckoutDate(LocalDateTime.now());
 				cartRepo.save(cart);
 				
 				BeanUtils.copyProperties(cart, cartDTO);

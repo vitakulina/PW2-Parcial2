@@ -50,7 +50,7 @@ public class UserController {
 	@PostMapping(value="/users/create")
 	public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateDTO userCreateDTO){
 		UserDTO user = userService.postRegisterUser(userCreateDTO);
-		return new ResponseEntity<>(user, HttpStatus.OK);
+		return new ResponseEntity<>(user, HttpStatus.CREATED);
 	}
 	
 	@PutMapping(value = "/users/{id}")

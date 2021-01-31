@@ -2,9 +2,11 @@ package com.vitakulina.apiEcommerce.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -24,8 +26,9 @@ public class Cart {
 	private String fullName;
 	private String email;
 	private LocalDate creationDate;
+	private LocalDateTime checkoutDate;
 		
-	@OneToMany(mappedBy = "cart")
+	@OneToMany(mappedBy = "cart", fetch=FetchType.EAGER) //agregado fetchType Eager sino las pruebas de procesamiento de carritos fallaban (porque iniciaba carritos lazily y no traia el set de productos)
 	Set<ProductInCart> productsInCart;
 	
 	private String status;
@@ -126,6 +129,14 @@ public class Cart {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+
+	public LocalDateTime getCheckoutDate() {
+		return checkoutDate;
+	}
+
+	public void setCheckoutDate(LocalDateTime checkoutDate) {
+		this.checkoutDate = checkoutDate;
 	} 
 	
 	
